@@ -25,7 +25,6 @@ class Scenario:
                     step.execute(state, stop_event)
                     if stop_event.is_set():
                         return
-                    state.up_level()
             except ApplicationError as e:
                 logger.error("ApplicationError: %s", e)
         logger.info("Stopped")

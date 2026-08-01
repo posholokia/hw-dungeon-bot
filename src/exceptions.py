@@ -2,7 +2,7 @@ class ApplicationError(Exception):
     pass
 
 
-class RoomNotFoundError(TimeoutError):
+class RoomNotFoundError(ApplicationError):
     pass
 
 

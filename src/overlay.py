@@ -9,8 +9,8 @@ from collections.abc import Callable
 from contextlib import AbstractContextManager
 from threading import Event
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QFont, QFontDatabase, QGuiApplication, QMouseEvent
+from PySide6.QtCore import Qt, QTimer, QPoint
+from PySide6.QtGui import QFont, QFontDatabase, QGuiApplication, QMouseEvent, QPainter, QColor, QPen
 from PySide6.QtWidgets import QApplication, QLabel, QTextEdit, QVBoxLayout, QWidget
 
 
@@ -25,6 +25,48 @@ def _mono_font(point_size: int) -> QFont:
     font.setStyleHint(QFont.StyleHint.Monospace)
     font.setPointSize(point_size)
     return font
+
+
+class _ClickMarker(QWidget):
+    """Fullscreen-transparent crosshair shown briefly at a screen point."""
+
+    _SIZE = 36
+    _DURATION_MS = 800
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.Tool
+            | Qt.WindowType.WindowTransparentForInput
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        self.resize(self._SIZE, self._SIZE)
+        self.hide()
+        self._hide_timer = QTimer(self)
+        self._hide_timer.setSingleShot(True)
+        self._hide_timer.timeout.connect(self.hide)
+
+    def flash_at(self, x: int, y: int) -> None:
+        self.move(x - self._SIZE // 2, y - self._SIZE // 2)
+        self.show()
+        self.raise_()
+        self._hide_timer.start(self._DURATION_MS)
+
+    def paintEvent(self, event) -> None:  # noqa: N802 - Qt API
+        del event
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        pen = QPen(QColor(255, 64, 64, 230))
+        pen.setWidth(3)
+        painter.setPen(pen)
+        mid = self._SIZE // 2
+        painter.drawEllipse(QPoint(mid, mid), mid - 4, mid - 4)
+        painter.drawLine(mid, 4, mid, self._SIZE - 4)
+        painter.drawLine(4, mid, self._SIZE - 4, mid)
+        painter.end()
 
 
 class _QueueLogHandler(logging.Handler):
@@ -177,8 +219,16 @@ class LogOverlay(AbstractContextManager["LogOverlay"]):
         self._opacity = opacity
 
         self._queue: queue.Queue[str] = queue.Queue(maxsize=500)
+        self._click_queue: queue.Queue[tuple[int, int]] = queue.Queue(maxsize=32)
         self._handler: _QueueLogHandler | None = None
         self._own_stream: logging.Handler | None = None
+
+    def show_click(self, x: int, y: int) -> None:
+        """Thread-safe: queue a click marker at absolute screen coordinates."""
+        try:
+            self._click_queue.put_nowait((x, y))
+        except queue.Full:
+            pass
 
     def __enter__(self) -> LogOverlay:
         self._handler = _QueueLogHandler(self._queue)
@@ -241,6 +291,7 @@ class LogOverlay(AbstractContextManager["LogOverlay"]):
             opacity=self._opacity,
         )
         window.show()
+        marker = _ClickMarker()
 
         previous_sigint = signal.getsignal(signal.SIGINT)
 
@@ -254,11 +305,17 @@ class LogOverlay(AbstractContextManager["LogOverlay"]):
         signal.signal(signal.SIGINT, _request_stop)
 
         def _poll_worker() -> None:
+            while True:
+                try:
+                    x, y = self._click_queue.get_nowait()
+                except queue.Empty:
+                    break
+                marker.flash_at(x, y)
             if not worker.is_alive() or (stop_event is not None and stop_event.is_set()):
                 app.quit()
 
         poll = QTimer()
-        poll.setInterval(150)
+        poll.setInterval(50)
         poll.timeout.connect(_poll_worker)
         poll.start()
 
@@ -269,6 +326,8 @@ class LogOverlay(AbstractContextManager["LogOverlay"]):
             if stop_event is not None:
                 stop_event.set()
             poll.stop()
+            marker.hide()
+            marker.close()
             window.close()
 
         worker.join(timeout=2)

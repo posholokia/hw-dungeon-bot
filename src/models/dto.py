@@ -12,17 +12,19 @@ class RoomCoordinates(TypedDict):
     center: list[tuple[int, int]]
 
 
+class ClickArea(TypedDict):
+    x: int
+    y: int
+    width: int
+    height: int
+
+
+class RoomClickAreas(TypedDict):
+    left: ClickArea
+    right: ClickArea
+    center: ClickArea
+
+
 @dataclass
 class State:
-    level: int
-
-    def up_level(self) -> None:
-        self.level = self.level + 1
-
-    def get_room_position(self) -> RoomPosition:
-        if self.level % 10 == 0 or self.level % 10 == 1:
-            return "left"
-        elif self.level % 10 == 5 or self.level % 10 == 6:
-            return "right"
-        else:
-            return "center"
+    room_position: RoomPosition | None = None
