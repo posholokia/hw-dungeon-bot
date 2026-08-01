@@ -1,0 +1,9 @@
+.venv/
+trash/
+build/
+dist/
+*.spec.bak
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
