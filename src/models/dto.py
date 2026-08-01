@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal, TypedDict
 
 
@@ -25,6 +25,20 @@ class RoomClickAreas(TypedDict):
     center: ClickArea
 
 
+class SelectionFingerprints(TypedDict):
+    common: list[tuple[int, int, int]]
+    earth: list[tuple[int, int, int]]
+    water: list[tuple[int, int, int]]
+    fire: list[tuple[int, int, int]]
+
+
+@dataclass
+class FoundElement:
+    element: RoomTypes
+    position: RoomPosition
+
+
 @dataclass
 class State:
     room_position: RoomPosition | None = None
+    available_elements: list[FoundElement] = field(default_factory=list)

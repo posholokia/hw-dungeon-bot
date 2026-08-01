@@ -40,8 +40,41 @@ class RoomConfigs(BaseSettings):
     fingerprint: list[tuple[int, int, int]]
 
 
+class SelectionCoordinates(BaseSettings):
+    left: list[tuple[int, int]]
+    right: list[tuple[int, int]]
+    center: list[tuple[int, int]]
+
+
+class SelectionFingerprint(BaseSettings):
+    common: list[tuple[int, int, int]]
+    earth: list[tuple[int, int, int]]
+    water: list[tuple[int, int, int]]
+    fire: list[tuple[int, int, int]]
+
+
+class SelectionClickArea(BaseSettings):
+    left: ClickArea
+    right: ClickArea
+    center: ClickArea
+
+
+class SelectionConfigs(BaseSettings):
+    coordinates: SelectionCoordinates = Field(default_factory=SelectionCoordinates)
+    fingerprint: SelectionFingerprint = Field(default_factory=SelectionFingerprint)
+    click_area: SelectionClickArea = Field(default_factory=SelectionClickArea)
+
+
+class AutobattleConfigs(BaseSettings):
+    coordinates: list[tuple[int, int]]
+    click_area: ClickArea = Field(default_factory=ClickArea)
+    fingerprint: list[tuple[int, int, int]]
+
+
 class AppSettings(BaseSettings):
     room: RoomConfigs = Field(default_factory=RoomConfigs)
+    selection: SelectionConfigs = Field(default_factory=SelectionConfigs)
+    autobattle: AutobattleConfigs = Field(default_factory=AutobattleConfigs)
 
     @classmethod
     def settings_customise_sources(
