@@ -47,7 +47,7 @@ class AutobattleStep:
                 self._click(stop_event)
                 return
 
-            if stop_event.wait(2):
+            if stop_event.wait(timeout=0.005):
                 return
 
         raise AutobattleNotFoundError("Autobattle button not found")

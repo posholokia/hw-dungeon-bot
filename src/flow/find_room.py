@@ -40,7 +40,7 @@ class FindRoomStep:
                 logger.info("Room found at %s", position)
                 return
 
-            if stop_event.wait(2):
+            if stop_event.wait(timeout=0.005):
                 return
 
         raise RoomNotFoundError("Room not found")

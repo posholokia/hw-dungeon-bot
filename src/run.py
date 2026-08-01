@@ -51,7 +51,7 @@ def main() -> None:
 
     stop_event = Event()
     state = State()
-
+    preview_seconds = 0.3
     with GlobalStopHotkey("ctrl+shift+q", stop_event.set), LogOverlay() as overlay:
         step1 = FindRoomStep(
             timeout=30,
@@ -61,6 +61,7 @@ def main() -> None:
         step2 = ClickRoomStep(
             click_areas=click_areas,
             show_click=overlay.show_click,
+            preview_seconds=preview_seconds,
         )
         step3 = FindElementsStep(
             timeout=30,
@@ -70,6 +71,7 @@ def main() -> None:
         step4 = SelectElementStep(
             click_areas=selection_click_areas,
             show_click=overlay.show_click,
+            preview_seconds=preview_seconds,
         )
         step5 = AutobattleStep(
             timeout=30,
@@ -77,6 +79,7 @@ def main() -> None:
             fingerprint=settings.autobattle.fingerprint,
             click_area=settings.autobattle.click_area.model_dump(),
             show_click=overlay.show_click,
+            preview_seconds=preview_seconds,
         )
         scenario = Scenario(steps=[step1, step2, step3, step4, step5])
         overlay.run(lambda: scenario.run(state, stop_event), stop_event=stop_event)

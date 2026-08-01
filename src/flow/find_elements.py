@@ -49,7 +49,7 @@ class FindElementsStep:
                 logger.info("Available elements: %s", names)
                 return
 
-            if stop_event.wait(2):
+            if stop_event.wait(timeout=0.005):
                 return
 
         raise ElementsNotFoundError("No elements found")
