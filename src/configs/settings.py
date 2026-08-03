@@ -71,11 +71,60 @@ class AutobattleConfigs(BaseSettings):
     fingerprint: list[tuple[int, int, int]]
 
 
+class BattleResultFingerprint(BaseSettings):
+    win: list[tuple[int, int, int]]
+    lose: list[tuple[int, int, int]]
+
+
+class BattleResultConfigs(BaseSettings):
+    coordinates: list[tuple[int, int]]
+    fingerprint: BattleResultFingerprint = Field(default_factory=BattleResultFingerprint)
+
+
+class TitanCountConfigs(BaseSettings):
+    coordinates: dict[str, list[tuple[int, int]]]
+    fingerprint: dict[str, list[tuple[int, int, int]]]
+
+
+class TitanDeadConfigs(BaseSettings):
+    """Offsets from each titan icon center to sample points for the МЁРТВ label."""
+
+    sample_offsets: list[tuple[int, int]]
+
+
+class TitanIconConfigs(BaseSettings):
+    """Battle-result icon bbox relative to titan_count edge-pair center."""
+
+    dx: int
+    dy: int
+    size: int
+
+
+class TitanCatalogEntry(BaseSettings):
+    name: str
+    element: str
+    role: str
+    fingerprint: list[tuple[int, int, int]]
+
+
+class TitansConfigs(BaseSettings):
+    icon: TitanIconConfigs = Field(default_factory=TitanIconConfigs)
+    fingerprint_offsets: list[tuple[int, int]]
+    health_offset_y: int
+    energy_offset_y: int
+    bar_half_width: int
+    catalog: list[TitanCatalogEntry]
+
+
 class AppSettings(BaseSettings):
     room: RoomConfigs = Field(default_factory=RoomConfigs)
     selection: SelectionConfigs = Field(default_factory=SelectionConfigs)
     autobattle: AutobattleConfigs = Field(default_factory=AutobattleConfigs)
-
+    battle_result: BattleResultConfigs = Field(default_factory=BattleResultConfigs)
+    titan_count: TitanCountConfigs = Field(default_factory=TitanCountConfigs)
+    titan_dead: TitanDeadConfigs = Field(default_factory=TitanDeadConfigs)
+    titans: TitansConfigs = Field(default_factory=TitansConfigs)
+    
     @classmethod
     def settings_customise_sources(
         cls,

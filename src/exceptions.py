@@ -14,3 +14,11 @@ class AutobattleNotFoundError(ApplicationError):
     pass
 
 
+class BattleResultNotFoundError(ApplicationError):
+    pass
+
+
+class TitanCountNotFoundError(ApplicationError):
+    pass
+
+
