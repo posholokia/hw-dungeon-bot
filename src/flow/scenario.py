@@ -1,7 +1,7 @@
 import logging
 from threading import Event
 
-from exceptions import ApplicationError
+from exceptions import ApplicationError, StopApplicationError
 from interfaces.flow import IStep
 from models.dto import State
 
@@ -25,6 +25,10 @@ class Scenario:
                     step.execute(state, stop_event)
                     if stop_event.is_set():
                         return
+            except StopApplicationError as e:
+                logger.info("StopApplicationError: %s", e)
+                return
             except ApplicationError as e:
                 logger.error("ApplicationError: %s", e)
+        
         logger.info("Stopped")

@@ -7,7 +7,13 @@ from dataclasses import dataclass
 from threading import Event
 from typing import TypedDict
 
-from exceptions import ApplicationError, BattleResultNotFoundError, TitanCountNotFoundError
+from exceptions import (
+    ApplicationError,
+    BattleResultNotFoundError,
+    StopApplicationError,
+    TitanCountNotFoundError,
+    TitanNotIdentifiedError,
+)
 from flow.utils import match_fingerprint
 from models.dto import State, Titan, TitanElements, TitalRoles
 from vision.screen import take_print
@@ -57,21 +63,7 @@ def _is_health_green(rgb: tuple[int, int, int]) -> bool:
 
 def _is_energy_yellow(rgb: tuple[int, int, int]) -> bool:
     r, g, b = rgb
-    return r >= 140 and g >= 90 and b <= 100 and r > b + 40
-
-
-def _mean_abs_diff(
-    a: list[tuple[int, int, int]],
-    b: list[tuple[int, int, int]],
-) -> float:
-    total = 0
-    n = 0
-    for ca, cb in zip(a, b, strict=True):
-        for x, y in zip(ca, cb, strict=True):
-            total += abs(x - y)
-            n += 1
-    return total / n if n else 1e9
-
+    return r == 227 and g == 199 and b == 28
 
 class AnalyzeBattleStep:
     """Wait for the battle result screen and run post-battle checks."""
@@ -111,7 +103,7 @@ class AnalyzeBattleStep:
             return
 
         self._check_titans_resources(state)
-
+        
     def _check_win_lose(self, state: State, stop_event: Event) -> None:
         start = time.perf_counter()
         logger.info("Waiting for win/lose screen")
@@ -206,8 +198,13 @@ class AnalyzeBattleStep:
         icon_cy = cy + cfg.icon_dy + cfg.icon_size // 2
         points = [(icon_cx + dx, icon_cy + dy) for dx, dy in cfg.fingerprint_offsets]
         scanned = take_print(points)
-        best = min(cfg.catalog, key=lambda item: _mean_abs_diff(scanned, item.fingerprint))
-        return best
+        print(f"{scanned=}")
+        for item in cfg.catalog:
+            if match_fingerprint(scanned, item.fingerprint):
+                return item
+        raise TitanNotIdentifiedError(
+            f"No titan matched fingerprint at ({cx}, {cy}): {scanned}"
+        )
 
     def _bar_percent(
         self,

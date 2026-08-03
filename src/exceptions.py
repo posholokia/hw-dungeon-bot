@@ -2,6 +2,10 @@ class ApplicationError(Exception):
     pass
 
 
+class StopApplicationError(ApplicationError):
+    pass
+
+
 class RoomNotFoundError(ApplicationError):
     pass
 
@@ -22,3 +26,5 @@ class TitanCountNotFoundError(ApplicationError):
     pass
 
 
+class TitanNotIdentifiedError(ApplicationError):
+    pass

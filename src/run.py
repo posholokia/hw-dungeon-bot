@@ -7,8 +7,10 @@ from flow.autobattle import AutobattleStep
 from flow.click_room import ClickRoomStep
 from flow.find_elements import FindElementsStep
 from flow.find_room import FindRoomStep
+from flow.replay import ReplayStep
 from flow.scenario import Scenario
 from flow.select_element import SelectElementStep
+from flow.solution import SolutionStep
 from input import GlobalStopHotkey
 from models.dto import State
 from overlay import LogOverlay
@@ -73,7 +75,7 @@ def main() -> None:
     stop_event = Event()
     state = State()
     preview_seconds = 0.3
-    timeout = 30
+    timeout = 10
     with GlobalStopHotkey("ctrl+shift+q", stop_event.set), LogOverlay() as overlay:
         step1 = FindRoomStep(
             timeout=timeout,
@@ -115,7 +117,34 @@ def main() -> None:
             dead_sample_offsets=settings.titan_dead.sample_offsets,
             titans=_titans_config_from_settings(settings),
         )
-        scenario = Scenario(steps=[step1, step2, step3, step4, step5, step6])
+        replay_step = ReplayStep(
+            timeout=timeout,
+            coordinates=settings.replay.coordinates,
+            fingerprint=settings.replay.fingerprint,
+            click_area=settings.replay.click_area,
+            show_click=overlay.show_click,
+            preview_seconds=preview_seconds,
+        )
+        step7 = SolutionStep(
+            timeout=timeout,
+            replay_step=replay_step,
+            coordinates=settings.solution.coordinates,
+            fingerprint=settings.solution.fingerprint,
+            click_area=settings.solution.click_area.model_dump(),
+            show_click=overlay.show_click,
+            preview_seconds=preview_seconds,
+        )
+        scenario = Scenario(
+            steps=[
+                step1,
+                step2,
+                step3,
+                step4,
+                step5,
+                step6,
+                step7,
+            ]
+        )
         overlay.run(lambda: scenario.run(state, stop_event), stop_event=stop_event)
 
 

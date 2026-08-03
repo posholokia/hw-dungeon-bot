@@ -105,6 +105,7 @@ class TitanCatalogEntry(BaseSettings):
     element: str
     role: str
     fingerprint: list[tuple[int, int, int]]
+    position: int
 
 
 class TitansConfigs(BaseSettings):
@@ -116,6 +117,55 @@ class TitansConfigs(BaseSettings):
     catalog: list[TitanCatalogEntry]
 
 
+# class HealingTeamConfigs(BaseSettings):
+#     team: list[str]
+#     titans: list[str]
+#     low_then: int
+
+
+# class ReplayRulesConfigs(BaseSettings):
+#     health: int
+#     health_energy: int
+
+
+# class FlowConfigs(BaseSettings):
+#     common_teams: dict[str, list[str]]
+#     fire_teams: dict[str, list[str]]
+#     replay_rules: dict[str, ReplayRulesConfigs]
+#     heal_rules: HealingTeamConfigs
+
+#     @classmethod
+#     def settings_customise_sources(
+#         cls,
+#         settings_cls: type[BaseSettings],
+#         init_settings: PydanticBaseSettingsSource,
+#         env_settings: PydanticBaseSettingsSource,
+#         dotenv_settings: PydanticBaseSettingsSource,
+#         file_secret_settings: PydanticBaseSettingsSource,
+#     ) -> tuple[PydanticBaseSettingsSource, ...]:
+#         return (
+#             JsonConfigSettingsSource(
+#                 settings_cls,
+#                 json_file=_CURRENT_DIR / "flow_cfg.json",
+#                 json_file_encoding="utf-8",
+#             ),
+#             env_settings,
+#             dotenv_settings,
+#             file_secret_settings,
+#         )
+
+class SolutionConfigs(BaseSettings):
+    coordinates: list[tuple[int, int]]
+    fingerprint: list[tuple[int, int, int]]
+    click_area: ClickArea = Field(default_factory=ClickArea)
+
+
+class ReplayConfigs(BaseSettings):
+    coordinates: dict[str, list[tuple[int, int]]]
+    fingerprint: dict[str, list[tuple[int, int, int]]]
+    click_area: dict[str, ClickArea] = Field(default_factory=dict[str, ClickArea])
+
+
 class AppSettings(BaseSettings):
     room: RoomConfigs = Field(default_factory=RoomConfigs)
     selection: SelectionConfigs = Field(default_factory=SelectionConfigs)
@@ -124,7 +174,10 @@ class AppSettings(BaseSettings):
     titan_count: TitanCountConfigs = Field(default_factory=TitanCountConfigs)
     titan_dead: TitanDeadConfigs = Field(default_factory=TitanDeadConfigs)
     titans: TitansConfigs = Field(default_factory=TitansConfigs)
-    
+    solution: SolutionConfigs = Field(default_factory=SolutionConfigs)
+    replay: ReplayConfigs = Field(default_factory=ReplayConfigs)
+    # flow: FlowConfigs = Field(default_factory=FlowConfigs)
+
     @classmethod
     def settings_customise_sources(
         cls,
