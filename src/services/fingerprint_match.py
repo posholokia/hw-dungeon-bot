@@ -7,7 +7,7 @@ def match_fingerprint(
     scanned: list[tuple[int, int, int]],
     fingerprint: list[tuple[int, int, int]],
     *,
-    tolerance: int = 12,
+    tolerance: int = 8,
 ) -> bool:
     """Match sample points to a reference fingerprint.
 
@@ -18,8 +18,6 @@ def match_fingerprint(
     if len(scanned) != len(fingerprint):
         return False
 
-    # logger.info("Matching fingerprint: %s", fingerprint)
-    # logger.info("Scanned: %s", scanned)
     for sample, reference in zip(scanned, fingerprint, strict=True):
         if any(
             abs(sample_c - reference_c) > tolerance

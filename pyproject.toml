@@ -10,15 +10,23 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "mss>=10.2.0",
+    "mypy>=2.3.0",
     "numpy>=2.5.1",
     "pillow>=12.3.0",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "pynput>=1.8.2",
     "pyside6-essentials>=6.11.1",
+    "rodi>=2.1.0",
+    "ruff>=0.16.2",
+    "structlog>=26.1.0",
 ]
 
 [dependency-groups]
 build = [
     "pyinstaller>=6.14.0",
 ]
+
+[tool.mypy]
+python_version = "3.13"
+plugins = ["pydantic.mypy"]
