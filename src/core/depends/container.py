@@ -10,6 +10,7 @@ from output.mouse.designation import DesignationClick
 from run import BotRunner
 from services.select_room.finder import RoomFinderService
 from services.select_room.selector import SelectRoomService
+from services.titan_catalog import TitanCatalog
 from use_cases.select_room import SelectRoomUseCase
 from widgets.click_marker import ClickMarker
 from widgets.log_overlay import LogOverlayWindow
@@ -97,6 +98,12 @@ class DiContainer:
                 click_service=click_service,
                 preview_seconds=preview_seconds,
             )
+
+        def build_titan_catalog_service() -> TitanCatalog:
+            titan_catalog_dir = self._config.titan_catalog_dir
+            return TitanCatalog(titan_catalog_dir)
+
+        self._container.add_singleton_by_factory(build_titan_catalog_service, TitanCatalog)
 
         self._container.register_factory(
             build_room_finder_service,

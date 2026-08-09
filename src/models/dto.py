@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pydantic import BaseModel
-from domain.types import TitalRoles, TitanElements
+from domain.types import FingerPrintList, TitalRoles, TitanElements
 
 
 class ClickArea(BaseModel):
@@ -11,12 +11,12 @@ class ClickArea(BaseModel):
 
 
 @dataclass
-class Titan:
+class Titan(BaseModel):
+    fingerprint: FingerPrintList
     name: str
-    health_prc: float
-    energy_prc: float
     element: TitanElements
     role: TitalRoles
+    position: int
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Titan):
