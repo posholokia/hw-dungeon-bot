@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pydantic import BaseModel
-from domain.types import FingerPrintList, TitalRoles, TitanElements
+from domain.types import FingerPrint, RoomElement, TitanRole, TitanElement
 
 
 class ClickArea(BaseModel):
@@ -9,13 +9,15 @@ class ClickArea(BaseModel):
     width: int
     height: int
 
+    def c(self) -> tuple[int, int]:
+        return (self.x, self.y)
 
-@dataclass
+
 class Titan(BaseModel):
-    fingerprint: FingerPrintList
+    fingerprint: FingerPrint
     name: str
-    element: TitanElements
-    role: TitalRoles
+    element: TitanElement
+    role: TitanRole
     position: int
 
     def __eq__(self, other: object) -> bool:
@@ -29,13 +31,14 @@ class Titan(BaseModel):
 
 @dataclass
 class State:
-    _levels_completed: int = field(default=0, kw_only=True, init=False)
-    _current_level: int = field(default=1, kw_only=True, init=False)
-    _current_level_calibrated: bool = field(default=False, kw_only=True, init=False)
-    _need_healing: set[Titan] = field(default_factory=set, kw_only=True, init=False)
+    _levels_completed: int = field(default=0, init=False)
+    _current_level: int = field(default=1, init=False)
+    _current_level_calibrated: bool = field(default=False, init=False)
+    _need_healing: set[str] = field(default_factory=set, init=False)
+    _room_element: RoomElement | None = field(default=None, init=False)
 
     @property
-    def need_healing(self) -> set[Titan]:
+    def need_healing(self) -> set[str]:
         return self._need_healing
 
     @property
@@ -50,16 +53,20 @@ class State:
     def levels_completed(self) -> int:
         return self._levels_completed
 
-    def add_need_healing(self, titan: Titan) -> None:
-        if not isinstance(titan, Titan):
-            raise TypeError("titan must be a Titan")
-        if titan in self._need_healing:
-            return
-        self._need_healing.add(titan)
+    def add_need_healing(self, titan_name: str) -> None:
+        self._need_healing.add(titan_name)
+
+    @property
+    def room_element(self) -> RoomElement | None:
+        return self._room_element
+
+    @room_element.setter
+    def room_element(self, value: RoomElement) -> None:
+        self._room_element = value
 
     def up_level(self) -> None:
         self._levels_completed += 1
-        self.current_level += 1
+        self._current_level += 1
 
     def calibrate_current_level(self, level: int) -> None:
         """

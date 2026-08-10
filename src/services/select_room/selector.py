@@ -4,7 +4,7 @@ from threading import Event
 
 from structlog import getLogger
 
-from domain.types import ElementPositions, PreviewSeconds, RoomPosition, RoomElements
+from domain.types import ElementPosition, PreviewSeconds, RoomPosition, RoomElement
 from interfaces.output import IMouseClick
 from models.dto import ClickArea, State
 
@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 
 
 class SelectRoomService:
-    PRIORITY: tuple[RoomElements, ...] = ("water", "earth", "common", "fire")
+    PRIORITY: tuple[RoomElement, ...] = ("water", "earth", "common", "fire")
     """Сервис выбора комнаты."""
 
     def __init__(
@@ -33,7 +33,7 @@ class SelectRoomService:
     def select_room_element(
         self,
         state: State,
-        elements: dict[RoomElements, ElementPositions],
+        elements: dict[RoomElement, ElementPosition],
         stop_event: Event,
     ) -> None:
         if state.need_healing and "common" in elements:
@@ -46,6 +46,7 @@ class SelectRoomService:
                     self._click_service.mouse_click(
                         (area.x, area.y), area.width, area.height
                     )
+                    state.room_element = element
                     break
 
         stop_event.wait(self._preview_seconds)

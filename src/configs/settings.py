@@ -11,12 +11,13 @@ from pydantic_settings import (
 )
 
 from domain.types import (
+    Coordinate,
     CoordinateList,
-    ElementPositions,
-    FingerPrintList,
-    RoomElements,
-    TitalRoles,
-    TitanElements,
+    ElementPosition,
+    FingerPrint,
+    RoomElement,
+    TitanRole,
+    TitanElement,
 )
 from models.dto import ClickArea, RoomPosition
 
@@ -34,13 +35,13 @@ _CURRENT_DIR = _configs_dir()
 class RoomConfigs(BaseSettings):
     coordinates: dict[RoomPosition, CoordinateList]
     click_area: dict[RoomPosition, ClickArea]
-    fingerprint: FingerPrintList
+    fingerprint: FingerPrint
 
 
 class SelectionConfigs(BaseSettings):
-    coordinates: dict[ElementPositions, CoordinateList]
-    fingerprint: dict[RoomElements, FingerPrintList]
-    click_area: dict[ElementPositions, ClickArea]
+    coordinates: dict[ElementPosition, CoordinateList]
+    fingerprint: dict[RoomElement, FingerPrint]
+    click_area: dict[ElementPosition, ClickArea]
 
 
 
@@ -49,9 +50,38 @@ class TitanTeamConfig(BaseSettings):
     coordinates: CoordinateList
 
 
+class HealingRulesConfig(BaseSettings):
+    titans: list[str]  # имена титанов
+    heal_below: int  # проценты
+
+
+class SelectionConfig(BaseSettings):
+    filter_button: ClickArea
+    elements: dict[TitanElement, ClickArea]
+    roles: dict[TitanRole, ClickArea]
+    titan: ClickArea
+
+
+class AutobattleConfig(BaseSettings):
+    coordinates: CoordinateList
+    click_area: ClickArea
+    fingerprint: FingerPrint
+
+
+class BattleResultConfig(BaseSettings):
+    coordinates: CoordinateList
+    fingerprints: dict[str, FingerPrint]
+
+
 class BattleConfigs(BaseSettings):
     current_team: list[TitanTeamConfig]
-
+    teams: dict[RoomElement, list[list[str]]]  # имена титанов
+    healing_team: list[str]  # имена титанов
+    healing_rules: HealingRulesConfig
+    selection: SelectionConfig
+    autobattle: AutobattleConfig
+    battle_result: BattleResultConfig
+    
 
 class AppSettings(BaseSettings):
     room: RoomConfigs = Field(default_factory=RoomConfigs)

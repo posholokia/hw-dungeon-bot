@@ -1,11 +1,13 @@
 import logging
 
+from domain.types import FingerPrint
+
 logger = logging.getLogger(__name__)
 
 
 def match_fingerprint(
-    scanned: list[tuple[int, int, int]],
-    fingerprint: list[tuple[int, int, int]],
+    scanned: FingerPrint,
+    fingerprint: FingerPrint,
     *,
     tolerance: int = 8,
 ) -> bool:

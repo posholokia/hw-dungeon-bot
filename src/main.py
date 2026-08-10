@@ -4,12 +4,12 @@ from threading import Event
 from core.depends.container import get_container
 from core.logger.processors.overlay import OverlayProcessor
 from core.logger.setup import setup_logging
-from run import BotRunner
+from run import BotOrchestration
 from widgets.qa_app import QaApp
 
 
 def _run_bot(
-    runner: BotRunner,
+    runner: BotOrchestration,
     stop_event: Event,
     overlay: OverlayProcessor,
 ) -> None:
@@ -21,7 +21,7 @@ def main() -> None:
     container = get_container()
     stop_event = Event()
 
-    bot_runner = container.get(BotRunner)
+    bot_runner = container.get(BotOrchestration)
     qa_app = container.get(QaApp)
     overlay = container.get(OverlayProcessor)
 

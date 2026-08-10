@@ -10,6 +10,11 @@ class ApplicationError(StopApplicationError):
     pass
 
 
+class BadBattleResult(RetryApplicationError):
+    """Бой проигран/умер титан/плохой результат боя"""
+    pass
+
+
 ################## DEPRECATED ERRORS ###################
 class RoomNotFoundError(StopApplicationError):
     pass

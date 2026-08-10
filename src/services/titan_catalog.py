@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from domain.types import FingerPrintList
+from domain.types import FingerPrint
 from models.dto import Titan
 
 
@@ -22,6 +22,10 @@ class TitanCatalog:
     def get_titan_by_name(self, name: str) -> Titan:
         return self._titans_by_name[name]
 
-    def get_titan_by_fingerprint(self, fingerprint: FingerPrintList) -> Titan:
+    def get_titan_by_fingerprint(self, fingerprint: FingerPrint) -> Titan:
         points = tuple(fingerprint)
         return self._titans_by_fingerprint[points]
+
+    def get_titans(self) -> dict[str, Titan]:
+        return self._titans_by_name
+    

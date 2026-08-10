@@ -1,31 +1,54 @@
+from dataclasses import dataclass
 from threading import Event
 
 from structlog import get_logger
 
+from domain.types import RoomElement
 from exceptions import RetryApplicationError, StopApplicationError
 from models.dto import State
+from services.battle.dto import BattleState
+from use_cases.battle import BattleUseCase
 from use_cases.select_room import SelectRoomUseCase
 
 logger = get_logger(__name__)
 
 
-class BotRunner:
+@dataclass
+class BattleStateCfg:
+    teams: dict[RoomElement, list[list[str]]]
+    healing_team: list[str]
+
+
+class BotOrchestration:
     def __init__(
         self,
         select_room_use_case: SelectRoomUseCase,
+        battle_use_case: BattleUseCase,
+        cfg: BattleStateCfg
     ) -> None:
         self._select_room = select_room_use_case
+        self._battle = battle_use_case
+        self._cfg = cfg
 
     def run(self, stop_event: Event) -> None:
-        logger.info("Bot started2")
         state = State()
-        logger.info(f"State:{state}")
-        logger.info(f"Stop event:{stop_event.is_set()}")
+        battle_state = BattleState(
+            teams=self._cfg.teams,
+            healing_team=self._cfg.healing_team
+        )
+
         while not stop_event.is_set():
-            logger.info("Running select room use case")
             try:
-                logger.info("Executing select room use case")
                 self._select_room.execute(state, stop_event)
+                battle_state.start(state=state)
+                battle_state, replay = self._battle.execute(state, battle_state, stop_event)
+                
+                if replay:
+                    battle_state.lose()
+                    continue
+                
+                self._win_battle(battle_state, state)
+                # TODO: если state.level % 10 = 0|5 - жмакнуть переход по уровню
             except StopApplicationError as e:
                 logger.info(e.__str__())
                 return
@@ -36,3 +59,7 @@ class BotRunner:
                 logger.exception(e.__str__())
                 return
         logger.info("Bot stopped")
+
+    def _win(self, battle_state: BattleState, state: State) -> None:
+        battle_state.win()
+        state.up_level()

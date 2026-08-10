@@ -7,8 +7,8 @@ from core.logger.processors.overlay import OverlayProcessor
 from domain.types import PreviewSeconds, Timeout
 from interfaces.output import IMouseClick
 from output.mouse.designation import DesignationClick
-from run import BotRunner
-from services.select_room.finder import RoomFinderService
+from run import BotOrchestration
+from services.select_room.scaner import RoomFinderService
 from services.select_room.selector import SelectRoomService
 from services.titan_catalog import TitanCatalog
 from use_cases.select_room import SelectRoomUseCase
@@ -54,7 +54,7 @@ class DiContainer:
         )
 
     def __init_use_cases(self) -> None:
-        self._container.register(BotRunner, BotRunner)
+        self._container.register(BotOrchestration, BotOrchestration)
         self._container.register(SelectRoomUseCase, SelectRoomUseCase)
 
     def __init_services(self) -> None:

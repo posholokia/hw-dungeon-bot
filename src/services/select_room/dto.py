@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from domain.types import ElementPositions, RoomElements
+from domain.types import ElementPosition, RoomElement
 
 
 @dataclass
 class FoundElement:
-    element: RoomElements
-    position: ElementPositions
+    element: RoomElement
+    position: ElementPosition
