@@ -5,10 +5,5 @@
   "reportMissingTypeStubs": "none",
   "venvPath": ".",
   "venv": ".venv",
-  "executionEnvironments": [
-    {
-      "root": "src",
-      "extraPaths": []
-    },
-  ],
+  "extraPaths": ["src"]
 }

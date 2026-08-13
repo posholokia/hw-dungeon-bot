@@ -1,30 +1,42 @@
-class ApplicationError(Exception):
+class StopApplicationError(Exception):
+    """Ошибка приложения, которая приводит к остановке выполнения."""
+
+
+class RetryApplicationError(Exception):
+    """Ошибка приложения, которая приводит к повторной попытке выполнения."""
+
+
+class ApplicationError(StopApplicationError):
     pass
 
 
-class StopApplicationError(ApplicationError):
+class BadBattleResult(RetryApplicationError):
+    """Бой проигран/умер титан/плохой результат боя"""
+
+
+################## DEPRECATED ERRORS ###################
+class RoomNotFoundError(StopApplicationError):
     pass
 
 
-class RoomNotFoundError(ApplicationError):
+class ElementsNotFoundError(StopApplicationError):
     pass
 
 
-class ElementsNotFoundError(ApplicationError):
+class AutobattleNotFoundError(StopApplicationError):
     pass
 
 
-class AutobattleNotFoundError(ApplicationError):
+class BattleResultNotFoundError(StopApplicationError):
     pass
 
 
-class BattleResultNotFoundError(ApplicationError):
+class TitanCountNotFoundError(RetryApplicationError):
     pass
 
 
-class TitanCountNotFoundError(ApplicationError):
+class TitanNotIdentifiedError(RetryApplicationError):
     pass
 
 
-class TitanNotIdentifiedError(ApplicationError):
-    pass
+########################################################

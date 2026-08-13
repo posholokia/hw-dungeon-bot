@@ -2,7 +2,23 @@ import pathlib
 import sys
 
 from pydantic import Field
-from pydantic_settings import BaseSettings, JsonConfigSettingsSource, PydanticBaseSettingsSource
+from pydantic_settings import (
+    BaseSettings,
+    JsonConfigSettingsSource,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+)
+
+from domain.types import (
+    CoordinateList,
+    ElementPosition,
+    FingerPrint,
+    RoomElement,
+    RoomPosition,
+    TitanElement,
+    TitanRole,
+)
+from models.dto import ClickArea
 
 
 def _configs_dir() -> pathlib.Path:
@@ -15,168 +31,111 @@ def _configs_dir() -> pathlib.Path:
 _CURRENT_DIR = _configs_dir()
 
 
-class RoomCoordinates(BaseSettings):
-    left: list[tuple[int, int]]
-    right: list[tuple[int, int]]
-    center: list[tuple[int, int]]
-
-
-class ClickArea(BaseSettings):
-    x: int
-    y: int
-    width: int
-    height: int
-
-
-class RoomClickArea(BaseSettings):
-    right: ClickArea
-    left: ClickArea
-    center: ClickArea
-
-
 class RoomConfigs(BaseSettings):
-    coordinates: RoomCoordinates = Field(default_factory=RoomCoordinates)
-    click_area: RoomClickArea = Field(default_factory=RoomClickArea)
-    fingerprint: list[tuple[int, int, int]]
-
-
-class SelectionCoordinates(BaseSettings):
-    left: list[tuple[int, int]]
-    right: list[tuple[int, int]]
-    center: list[tuple[int, int]]
-
-
-class SelectionFingerprint(BaseSettings):
-    common: list[tuple[int, int, int]]
-    earth: list[tuple[int, int, int]]
-    water: list[tuple[int, int, int]]
-    fire: list[tuple[int, int, int]]
-
-
-class SelectionClickArea(BaseSettings):
-    left: ClickArea
-    right: ClickArea
-    center: ClickArea
+    coordinates: dict[RoomPosition, CoordinateList]
+    click_area: dict[RoomPosition, ClickArea]
+    fingerprint: FingerPrint
 
 
 class SelectionConfigs(BaseSettings):
-    coordinates: SelectionCoordinates = Field(default_factory=SelectionCoordinates)
-    fingerprint: SelectionFingerprint = Field(default_factory=SelectionFingerprint)
-    click_area: SelectionClickArea = Field(default_factory=SelectionClickArea)
+    coordinates: dict[ElementPosition, CoordinateList]
+    fingerprint: dict[RoomElement, FingerPrint]
+    click_area: dict[ElementPosition, ClickArea]
 
 
-class AutobattleConfigs(BaseSettings):
-    coordinates: list[tuple[int, int]]
-    click_area: ClickArea = Field(default_factory=ClickArea)
-    fingerprint: list[tuple[int, int, int]]
+class TitanTeamConfig(BaseSettings):
+    click_area: ClickArea
+    coordinates: CoordinateList
 
 
-class BattleResultFingerprint(BaseSettings):
-    win: list[tuple[int, int, int]]
-    lose: list[tuple[int, int, int]]
+class HealingRulesConfig(BaseSettings):
+    titans: list[str]  # имена титанов
+    heal_below: int  # проценты
 
 
-class BattleResultConfigs(BaseSettings):
-    coordinates: list[tuple[int, int]]
-    fingerprint: BattleResultFingerprint = Field(default_factory=BattleResultFingerprint)
+class SelectionConfig(BaseSettings):
+    filter_button: ClickArea
+    elements: dict[TitanElement, ClickArea]
+    roles: dict[TitanRole, ClickArea]
+    titan: ClickArea
 
 
-class TitanCountConfigs(BaseSettings):
-    coordinates: dict[str, list[tuple[int, int]]]
-    fingerprint: dict[str, list[tuple[int, int, int]]]
+class AutobattleConfig(BaseSettings):
+    coordinates: CoordinateList
+    click_area: ClickArea
+    fingerprint: FingerPrint
 
 
-class TitanDeadConfigs(BaseSettings):
-    """Offsets from each titan icon center to sample points for the МЁРТВ label."""
-
-    sample_offsets: list[tuple[int, int]]
-
-
-class TitanIconConfigs(BaseSettings):
-    """Battle-result icon bbox relative to titan_count edge-pair center."""
-
-    dx: int
-    dy: int
-    size: int
+class BattleResultConfig(BaseSettings):
+    coordinates: CoordinateList
+    fingerprints: dict[str, FingerPrint]
 
 
-class TitanCatalogEntry(BaseSettings):
-    name: str
-    element: str
-    role: str
-    fingerprint: list[tuple[int, int, int]]
-    position: int
+class WindowCheckConfig(BaseSettings):
+    windows: dict[int, CoordinateList]
+    height: int
+    width: int
 
 
-class TitansConfigs(BaseSettings):
-    icon: TitanIconConfigs = Field(default_factory=TitanIconConfigs)
-    fingerprint_offsets: list[tuple[int, int]]
-    health_offset_y: int
-    energy_offset_y: int
-    bar_half_width: int
-    catalog: list[TitanCatalogEntry]
+class DeadStatusConfig(BaseSettings):
+    offsets: CoordinateList
+    fingerprint: FingerPrint
 
 
-# class HealingTeamConfigs(BaseSettings):
-#     team: list[str]
-#     titans: list[str]
-#     low_then: int
+class BarConfig(BaseSettings):
+    x: int  # относительная координата
+    y: int  # относительная координата
+    lenght: int
 
 
-# class ReplayRulesConfigs(BaseSettings):
-#     health: int
-#     health_energy: int
+class TitanStatusConfig(BaseSettings):
+    check: WindowCheckConfig
+    dead_status: DeadStatusConfig
+    health: BarConfig
+    energy: BarConfig
 
 
-# class FlowConfigs(BaseSettings):
-#     common_teams: dict[str, list[str]]
-#     fire_teams: dict[str, list[str]]
-#     replay_rules: dict[str, ReplayRulesConfigs]
-#     heal_rules: HealingTeamConfigs
-
-#     @classmethod
-#     def settings_customise_sources(
-#         cls,
-#         settings_cls: type[BaseSettings],
-#         init_settings: PydanticBaseSettingsSource,
-#         env_settings: PydanticBaseSettingsSource,
-#         dotenv_settings: PydanticBaseSettingsSource,
-#         file_secret_settings: PydanticBaseSettingsSource,
-#     ) -> tuple[PydanticBaseSettingsSource, ...]:
-#         return (
-#             JsonConfigSettingsSource(
-#                 settings_cls,
-#                 json_file=_CURRENT_DIR / "flow_cfg.json",
-#                 json_file_encoding="utf-8",
-#             ),
-#             env_settings,
-#             dotenv_settings,
-#             file_secret_settings,
-#         )
-
-class SolutionConfigs(BaseSettings):
-    coordinates: list[tuple[int, int]]
-    fingerprint: list[tuple[int, int, int]]
-    click_area: ClickArea = Field(default_factory=ClickArea)
+class ButtonConfig(BaseSettings):
+    click_area: ClickArea
+    coordinates: CoordinateList
+    fingerprint: FingerPrint
 
 
-class ReplayConfigs(BaseSettings):
-    coordinates: dict[str, list[tuple[int, int]]]
-    fingerprint: dict[str, list[tuple[int, int, int]]]
-    click_area: dict[str, ClickArea] = Field(default_factory=dict[str, ClickArea])
+class ReplayButtonsConfig(BaseSettings):
+    replay: dict[str, ButtonConfig]  # кнопки сдвигаются при поражении
+    ok: ButtonConfig
+    pause: ButtonConfig
+    retreat: ButtonConfig
+
+
+class ReplayConfig(BaseSettings):
+    replay_conditions: dict[str, list[str]]
+    buttons: ReplayButtonsConfig
+
+
+class BattleConfigs(BaseSettings):
+    current_team: list[TitanTeamConfig]
+    teams: dict[RoomElement, list[list[str]]]  # имена титанов
+    healing_team: list[str]  # имена титанов
+    healing_rules: HealingRulesConfig
+    selection: SelectionConfig
+    autobattle: AutobattleConfig
+    battle_result: BattleResultConfig
+    titan_status: TitanStatusConfig
+    replay: ReplayConfig
+
+
+class FloorTransitConfig(BaseSettings):
+    right: ButtonConfig
+    left: ButtonConfig
+    ok: ButtonConfig
 
 
 class AppSettings(BaseSettings):
     room: RoomConfigs = Field(default_factory=RoomConfigs)
     selection: SelectionConfigs = Field(default_factory=SelectionConfigs)
-    autobattle: AutobattleConfigs = Field(default_factory=AutobattleConfigs)
-    battle_result: BattleResultConfigs = Field(default_factory=BattleResultConfigs)
-    titan_count: TitanCountConfigs = Field(default_factory=TitanCountConfigs)
-    titan_dead: TitanDeadConfigs = Field(default_factory=TitanDeadConfigs)
-    titans: TitansConfigs = Field(default_factory=TitansConfigs)
-    solution: SolutionConfigs = Field(default_factory=SolutionConfigs)
-    replay: ReplayConfigs = Field(default_factory=ReplayConfigs)
-    # flow: FlowConfigs = Field(default_factory=FlowConfigs)
+    battle: BattleConfigs = Field(default_factory=BattleConfigs)
+    floor_transit: FloorTransitConfig = Field(default_factory=FloorTransitConfig)
 
     @classmethod
     def settings_customise_sources(
@@ -197,6 +156,12 @@ class AppSettings(BaseSettings):
             dotenv_settings,
             file_secret_settings,
         )
+
+    model_config = SettingsConfigDict(extra="ignore")
+
+    @property
+    def titan_catalog_dir(self) -> pathlib.Path:
+        return _CURRENT_DIR / "titans.json"
 
 
 def get_settings() -> AppSettings:
