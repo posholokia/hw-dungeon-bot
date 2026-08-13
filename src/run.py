@@ -61,16 +61,20 @@ class BotOrchestration:
                 logger.info(f"Пройдено {state.levels_completed} уровней")
 
             except StopApplicationError as e:
+                battle_state.clear()
                 logger.info(e.__str__())
                 return
             except RetryApplicationError as e:
+                battle_state.clear()
                 logger.info(e.__str__())
                 continue
             except Exception as e:
+                battle_state.clear()
                 logger.exception(e.__str__())
                 return
+
         logger.info("Bot stopped")
 
     def _win(self, battle_state: BattleState, state: State) -> None:
-        battle_state.win()
+        battle_state.clear()
         state.up_level()

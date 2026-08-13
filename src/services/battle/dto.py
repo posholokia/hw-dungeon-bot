@@ -27,7 +27,7 @@ class BattleState:
             except IndexError:
                 self.current_team = []
 
-    def win(self) -> None:
+    def clear(self) -> None:
         self.__team_index = 0
         self.__room_element = None
         self.current_team.clear()
