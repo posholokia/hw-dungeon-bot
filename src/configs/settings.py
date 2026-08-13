@@ -1,7 +1,8 @@
 import pathlib
 import sys
+from typing import Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import (
     BaseSettings,
     JsonConfigSettingsSource,
@@ -123,6 +124,14 @@ class BattleConfigs(BaseSettings):
     battle_result: BattleResultConfig
     titan_status: TitanStatusConfig
     replay: ReplayConfig
+
+    @model_validator(mode="after")
+    def healing_validate(self) -> Self:
+        if set(self.healing_team) & set(self.healing_rules.titans):
+            raise ValueError(
+                "Титаны, выбранные для лечения не должны состоять в команде лечения"
+            )
+        return self
 
 
 class FloorTransitConfig(BaseSettings):

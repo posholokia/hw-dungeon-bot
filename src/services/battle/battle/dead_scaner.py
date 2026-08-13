@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from domain.types import CoordinateList, FingerPrint
 from interfaces.output import IMouseClick
 from services.fingerprint_match import match_fingerprint
@@ -18,7 +20,7 @@ class DeadScanService:
         self._clicker = clicker
 
     def has_dead(self, team_len: int) -> bool:
-        windows = self._windows[team_len]
+        windows = deepcopy(self._windows[team_len])
         self._clicker.hide_mouse()
 
         for window in windows:

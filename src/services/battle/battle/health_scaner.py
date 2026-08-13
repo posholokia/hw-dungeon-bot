@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from copy import deepcopy
 
 from structlog import getLogger
 
@@ -42,7 +43,7 @@ class HealthScanerService:
         logger.info("Анализ здоровья/энергии после боя")
         self._clicker.hide_mouse()
         team_len = len(battle_state.current_team)
-        windows = self._windows[team_len]
+        windows = deepcopy(self._windows[team_len])
         result: list[TitanStatus] = []
         team: list[Titan] = []
         # нужно отсортировать команду по позициям,
