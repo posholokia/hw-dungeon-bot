@@ -9,7 +9,7 @@ def match_fingerprint(
     scanned: FingerPrint,
     fingerprint: FingerPrint,
     *,
-    tolerance: int = 16,
+    tolerance: int = 12,
 ) -> bool:
     """Match sample points to a reference fingerprint.
 

@@ -6,6 +6,7 @@ from structlog import getLogger
 
 from domain.types import CoordinateList, FingerPrint, Timeout
 from exceptions import ApplicationError, StopApplicationError
+from interfaces.output import IMouseClick
 from models.dto import Titan
 from services.fingerprint_match import match_fingerprint
 from services.titan_catalog import TitanCatalog
@@ -24,6 +25,7 @@ class BattleScannerService:
         autobattle_fingerprint: FingerPrint,
         result_coordinates: CoordinateList,
         result_fingerprints: dict[str, FingerPrint],
+        clicker: IMouseClick,
     ) -> None:
         self._analyze_team_coords = analyze_team_coords
         self._titan_catalog = titan_catalog
@@ -32,11 +34,13 @@ class BattleScannerService:
         self._result_coordinates = result_coordinates
         self._result_fingerprints = result_fingerprints
         self._timeout = timeout
+        self._clicker = clicker
 
     def scan_team(self) -> set[str]:
         time.sleep(1)
         current_team: set[str] = set()
         catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
+        self._clicker.hide_mouse()
 
         for coords in self._analyze_team_coords:
             fingerprint = take_print(coords)
@@ -58,6 +62,7 @@ class BattleScannerService:
     def scan_autobattle(self, stop_event: Event) -> None:
         start = time.perf_counter()
         logger.info("Ожидание кнопки автобоя")
+        self._clicker.hide_mouse()
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():
@@ -80,6 +85,7 @@ class BattleScannerService:
         """
         start = time.perf_counter()
         logger.info("Waiting for win/lose screen")
+        self._clicker.hide_mouse()
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():

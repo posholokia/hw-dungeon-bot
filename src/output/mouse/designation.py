@@ -42,3 +42,6 @@ class DesignationClick:
         except ValueError:
             logger.error(f"Invalid coordinates: {c}, width: {width}, height: {height}")
             raise
+
+    def hide_mouse(self) -> None:
+        pass

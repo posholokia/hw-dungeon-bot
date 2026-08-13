@@ -4,6 +4,7 @@ from structlog import getLogger
 
 from configs.settings import BarConfig
 from domain.types import Coordinate, CoordinateList, FingerPrint
+from interfaces.output import IMouseClick
 from models.dto import Titan
 from services.battle.dto import BattleState, TitanStatus
 from services.titan_catalog import TitanCatalog
@@ -29,14 +30,17 @@ class HealthScanerService:
         health_bar: BarConfig,
         energy_bar: BarConfig,
         titan_catalog: TitanCatalog,
+        clicker: IMouseClick,
     ) -> None:
         self._windows = windows
         self._health_bar = health_bar
         self._energy_bar = energy_bar
         self._catalog = titan_catalog
+        self._clicker = clicker
 
     def scan_health(self, battle_state: BattleState) -> list[TitanStatus]:
         logger.info("Анализ здоровья/энергии после боя")
+        self._clicker.hide_mouse()
         team_len = len(battle_state.current_team)
         windows = self._windows[team_len]
         result: list[TitanStatus] = []

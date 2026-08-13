@@ -105,11 +105,13 @@ class DiContainer:
         # )
         self._container.register(IMouseClick, MouseController)
 
-        def build_dead_scaner() -> DeadScanService:
+        def build_dead_scaner(context: ActivationScope) -> DeadScanService:
+            clicker = context.get(IMouseClick)
             return DeadScanService(
                 windows=self._config.battle.titan_status.check.windows,
                 offsets=self._config.battle.titan_status.dead_status.offsets,
                 fingerprint=self._config.battle.titan_status.dead_status.fingerprint,
+                clicker=clicker,
             )
 
         self._container.register_factory(
@@ -118,11 +120,13 @@ class DiContainer:
 
         def build_health_scaner(context: ActivationScope) -> HealthScanerService:
             catalog = context.get(TitanCatalog)
+            clicker = context.get(IMouseClick)
             return HealthScanerService(
                 windows=self._config.battle.titan_status.check.windows,
                 health_bar=self._config.battle.titan_status.health,
                 energy_bar=self._config.battle.titan_status.energy,
                 titan_catalog=catalog,
+                clicker=clicker,
             )
 
         self._container.register_factory(
@@ -151,12 +155,14 @@ class DiContainer:
             room_fingerprint = self._config.room.fingerprint
             element_coordinates = self._config.selection.coordinates
             element_fingerprint = self._config.selection.fingerprint
+            clicker = context.get(IMouseClick)
             return RoomFinderService(
                 timeout=timeout,
                 room_coordinates=room_coordinates,
                 room_fingerprint=room_fingerprint,
                 element_coordinates=element_coordinates,
                 element_fingerprints=element_fingerprint,
+                clicker=clicker,
             )
 
         def build_select_room_service(context: ActivationScope) -> SelectRoomService:
@@ -214,6 +220,7 @@ class DiContainer:
         def build_battle_scaner(context: ActivationScope) -> BattleScannerService:
             catalog = context.get(TitanCatalog)
             timeout = context.get(Timeout)
+            clicker = context.get(IMouseClick)
             team_coords = [cfg.coordinates for cfg in self._config.battle.current_team]
             return BattleScannerService(
                 titan_catalog=catalog,
@@ -223,6 +230,7 @@ class DiContainer:
                 autobattle_fingerprint=self._config.battle.autobattle.fingerprint,
                 result_coordinates=self._config.battle.battle_result.coordinates,
                 result_fingerprints=self._config.battle.battle_result.fingerprints,
+                clicker=clicker,
             )
 
         self._container.register_factory(

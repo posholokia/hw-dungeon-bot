@@ -28,3 +28,7 @@ class MouseController(IMouseClick):
         self._mouse.position = (x, y)
         self._mouse.click(Button.left)
         logger.debug(f"Клик мышью по координатам: x={x}, y={y}")
+
+    def hide_mouse(self) -> None:
+        self._mouse.position = (0, 0)
+        self._mouse.click(Button.left)

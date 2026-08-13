@@ -18,3 +18,7 @@ class IMouseClick(Protocol):
             width: Ширина области клика
             height: Высота области клика
         """
+
+    @abstractmethod
+    def hide_mouse(self) -> None:
+        """Прячет указатель мыши в угол экрана по координатам (0, 0)"""

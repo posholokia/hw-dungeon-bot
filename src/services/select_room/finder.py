@@ -12,6 +12,7 @@ from domain.types import (
     Timeout,
 )
 from exceptions import ApplicationError, StopApplicationError
+from interfaces.output import IMouseClick
 from services.fingerprint_match import match_fingerprint
 from vision.screen import take_print
 
@@ -31,16 +32,19 @@ class RoomFinderService:
         room_fingerprint: FingerPrint,
         element_coordinates: dict[ElementPosition, CoordinateList],
         element_fingerprints: dict[RoomElement, FingerPrint],
+        clicker: IMouseClick,
     ) -> None:
         self._timeout = timeout
         self._room_coordinates = room_coordinates
         self._room_fingerprint = room_fingerprint
         self._element_coordinates = element_coordinates
         self._element_fingerprints = element_fingerprints
+        self._clicker = clicker
 
     def find_room(self, stop_event: Event) -> RoomPosition:
         start = time.perf_counter()
         logger.info("Поиск комнаты в left/right/center")
+        self._clicker.hide_mouse()
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():
@@ -59,6 +63,7 @@ class RoomFinderService:
     def find_elements(self, stop_event: Event) -> dict[RoomElement, ElementPosition]:
         start = time.perf_counter()
         logger.info("Поиск элементов в комнате")
+        self._clicker.hide_mouse()
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():

@@ -86,6 +86,9 @@ class BattleUseCase:
         return battle_state, False
 
     def __select_team(self, battle_state: BattleState, stop_event: Event) -> None:
+        if not battle_state.can_change_team:
+            return
+
         expected_team = set(battle_state.current_team)
 
         if not expected_team:
