@@ -53,6 +53,9 @@ class BattleUseCase:
             Данные проведения боя и флаг необходимости переигровки (True - переиграть, False - бой успешен)
         """
         # ожидание кнопки автобоя, чтобы убедиться что сейчас на нужном экране
+        if not battle_state.current_team:
+            raise ApplicationError("Все команды проиграли")
+
         self._scaner.scan_autobattle(stop_event)
         self.__select_team(battle_state, stop_event)
         self._selector.click_autobattle(stop_event)
@@ -71,7 +74,7 @@ class BattleUseCase:
             return battle_state, True
 
         # ожидаем, так как анимация перекрывает полоски здоровья/энергии
-        if stop_event.wait(random.uniform(1.2, 2.2)):
+        if stop_event.wait(random.uniform(2.3, 4.2)):
             raise StopApplicationError()
 
         health_list = self._health_scaner.scan_health(battle_state)
@@ -90,9 +93,6 @@ class BattleUseCase:
             return
 
         expected_team = set(battle_state.current_team)
-
-        if not expected_team:
-            raise ApplicationError("Все команды провалили бой")
 
         current_team = self._scaner.scan_team()
         logger.info(f"Текущая команда титанов: {current_team}")
