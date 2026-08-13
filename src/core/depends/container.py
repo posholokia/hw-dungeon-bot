@@ -160,7 +160,7 @@ class DiContainer:
             )
 
         def build_select_room_service(context: ActivationScope) -> SelectRoomService:
-            click_areas = self._config.selection.click_area
+            click_areas = self._config.room.click_area
             click_service = context.get(IMouseClick)
             preview_seconds = context.get(PreviewSeconds)
             return SelectRoomService(

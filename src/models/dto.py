@@ -11,6 +11,7 @@ class ClickArea(BaseModel):
     width: int
     height: int
 
+    @property
     def c(self) -> tuple[int, int]:
         return (self.x, self.y)
 

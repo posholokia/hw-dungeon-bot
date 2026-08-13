@@ -20,16 +20,13 @@ class SelectRoomUseCase:
         self,
         finder: RoomFinderService,
         selector: SelectRoomService,
-        clicker: IMouseClick,
     ) -> None:
         self._finder = finder
         self._selector = selector
-        self._clicker = clicker
 
     def execute(
         self, state: State, battle_state: BattleState, stop_event: Event
     ) -> None:
-        self._clicker.mouse_click((500, 500))
         try:
             # обнаружение и клик на комнату
             room_position = self._finder.find_room(stop_event)

@@ -36,7 +36,7 @@ class BattleScannerService:
     def scan_team(self) -> set[str]:
         time.sleep(1)
         current_team = set()
-        catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog)
+        catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
 
         for coords in self._analyze_team_coords:
             fingerprint = take_print(coords)

@@ -77,7 +77,7 @@ class TeamSelectService:
         """
         filter_area = self._selection_cfg.filter_button
         element_area = self._selection_cfg.elements[titan.element]
-        role_area = self._selection_cfg.elements[titan.role]
+        role_area = self._selection_cfg.roles[titan.role]
         titan_area = self._selection_cfg.titan
 
         self._clicker.mouse_click(filter_area.c, filter_area.width, filter_area.height)

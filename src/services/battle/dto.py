@@ -16,7 +16,7 @@ class BattleState:
     def start(self, element: RoomElement) -> None:
         self.__room_element = element
 
-        if need_heal := self.__need_healing and not self.__team_index:
+        if need_heal := self.need_healing and not self.__team_index:
             titan: str = next(iter(need_heal))
             team = copy(self.healing_team)
             team.append(titan)

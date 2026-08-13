@@ -51,8 +51,8 @@ class BattleUseCase:
         Returns:
             Данные проведения боя и флаг необходимости переигровки (True - переиграть, False - бой успешен)
         """
-        self.__select_team(battle_state)
-        self.__autobattle()
+        self.__select_team(battle_state, stop_event)
+        self.__autobattle(stop_event)
         win = self._scaner.scan_win_loose(stop_event)
 
         if not win:

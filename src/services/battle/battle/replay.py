@@ -6,6 +6,7 @@ from structlog import getLogger
 
 from configs.settings import ButtonConfig, ReplayButtonsConfig
 from domain.types import PreviewSeconds, Timeout
+from exceptions import StopApplicationError
 from interfaces.output import IMouseClick
 from services.battle.dto import TitanStatus
 from services.fingerprint_match import match_fingerprint
@@ -67,6 +68,8 @@ class ReplayService:
                 stop_event.wait(self._preview)
 
             stop_event.wait(0.005)
+
+        raise StopApplicationError("Не найдено кнопки")
 
     def __check_criterion(self, titan: TitanStatus, criterion: str) -> bool:
         """
