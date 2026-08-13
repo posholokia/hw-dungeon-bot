@@ -1,6 +1,5 @@
 import pathlib
 import sys
-from typing import Any
 
 from pydantic import Field
 from pydantic_settings import (
@@ -11,15 +10,15 @@ from pydantic_settings import (
 )
 
 from domain.types import (
-    Coordinate,
     CoordinateList,
     ElementPosition,
     FingerPrint,
     RoomElement,
-    TitanRole,
+    RoomPosition,
     TitanElement,
+    TitanRole,
 )
-from models.dto import ClickArea, RoomPosition
+from models.dto import ClickArea
 
 
 def _configs_dir() -> pathlib.Path:
@@ -42,7 +41,6 @@ class SelectionConfigs(BaseSettings):
     coordinates: dict[ElementPosition, CoordinateList]
     fingerprint: dict[RoomElement, FingerPrint]
     click_area: dict[ElementPosition, ClickArea]
-
 
 
 class TitanTeamConfig(BaseSettings):
@@ -73,6 +71,48 @@ class BattleResultConfig(BaseSettings):
     fingerprints: dict[str, FingerPrint]
 
 
+class WindowCheckConfig(BaseSettings):
+    windows: dict[int, CoordinateList]
+    height: int
+    width: int
+
+
+class DeadStatusConfig(BaseSettings):
+    offsets: CoordinateList
+    fingerprint: FingerPrint
+
+
+class BarConfig(BaseSettings):
+    x: int  # относительная координата
+    y: int  # относительная координата
+    lenght: int
+
+
+class TitanStatusConfig(BaseSettings):
+    check: WindowCheckConfig
+    dead_status: DeadStatusConfig
+    health: BarConfig
+    energy: BarConfig
+
+
+class ButtonConfig(BaseSettings):
+    click_area: ClickArea
+    coordinates: CoordinateList
+    fingerprint: FingerPrint
+
+
+class ReplayButtonsConfig(BaseSettings):
+    replay: dict[str, ButtonConfig]  # кнопки сдвигаются при поражении
+    ok: ButtonConfig
+    pause: ButtonConfig
+    retreat: ButtonConfig
+
+
+class ReplayConfig(BaseSettings):
+    replay_conditions: dict[str, list[str]]
+    buttons: ReplayButtonsConfig
+
+
 class BattleConfigs(BaseSettings):
     current_team: list[TitanTeamConfig]
     teams: dict[RoomElement, list[list[str]]]  # имена титанов
@@ -81,12 +121,21 @@ class BattleConfigs(BaseSettings):
     selection: SelectionConfig
     autobattle: AutobattleConfig
     battle_result: BattleResultConfig
-    
+    titan_status: TitanStatusConfig
+    replay: ReplayConfig
+
+
+class FloorTransitConfig(BaseSettings):
+    right: ButtonConfig
+    left: ButtonConfig
+    ok: ButtonConfig
+
 
 class AppSettings(BaseSettings):
     room: RoomConfigs = Field(default_factory=RoomConfigs)
     selection: SelectionConfigs = Field(default_factory=SelectionConfigs)
     battle: BattleConfigs = Field(default_factory=BattleConfigs)
+    floor_transit: FloorTransitConfig = Field(default_factory=FloorTransitConfig)
 
     @classmethod
     def settings_customise_sources(

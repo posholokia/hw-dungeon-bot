@@ -7,9 +7,9 @@ from domain.types import (
     CoordinateList,
     ElementPosition,
     FingerPrint,
+    RoomElement,
     RoomPosition,
     Timeout,
-    RoomElement,
 )
 from exceptions import RetryApplicationError, StopApplicationError
 from services.fingerprint_match import match_fingerprint
@@ -92,9 +92,7 @@ class RoomFinderService:
                 found[element] = position
         return found
 
-    def _match_element_position(
-        self, position: ElementPosition
-    ) -> RoomElement | None:
+    def _match_element_position(self, position: ElementPosition) -> RoomElement | None:
         scanned = take_print(self._element_coordinates[position])
         for element in _ELEMENTS:
             if match_fingerprint(scanned, self._element_fingerprints[element]):

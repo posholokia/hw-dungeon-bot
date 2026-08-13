@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
+
 from pydantic import BaseModel
-from domain.types import FingerPrint, RoomElement, TitanRole, TitanElement
+
+from domain.types import FingerPrint, RoomElement, TitanElement, TitanRole
 
 
 class ClickArea(BaseModel):
@@ -34,12 +36,7 @@ class State:
     _levels_completed: int = field(default=0, init=False)
     _current_level: int = field(default=1, init=False)
     _current_level_calibrated: bool = field(default=False, init=False)
-    _need_healing: set[str] = field(default_factory=set, init=False)
     _room_element: RoomElement | None = field(default=None, init=False)
-
-    @property
-    def need_healing(self) -> set[str]:
-        return self._need_healing
 
     @property
     def current_level(self) -> int:
@@ -52,9 +49,6 @@ class State:
     @property
     def levels_completed(self) -> int:
         return self._levels_completed
-
-    def add_need_healing(self, titan_name: str) -> None:
-        self._need_healing.add(titan_name)
 
     @property
     def room_element(self) -> RoomElement | None:
@@ -78,23 +72,3 @@ class State:
             return
         self.current_level_calibrated = True
         self.current_level = level
-
-    # @property
-    # def win(self) -> bool:
-    #     return self._win
-
-    # @win.setter
-    # def win(self, value: bool) -> None:
-    #     if not isinstance(value, bool):
-    #         raise TypeError("win must be a boolean")
-    #     self._win = value
-
-    # @property
-    # def has_dead(self) -> bool:
-    #     return self._has_dead
-
-    # @has_dead.setter
-    # def has_dead(self, value: bool) -> None:
-    #     if not isinstance(value, bool):
-    #         raise TypeError("has_dead must be a boolean")
-    #     self._has_dead = value

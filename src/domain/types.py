@@ -28,4 +28,4 @@ RoomElement = Literal["common", "earth", "water", "fire"]
 Timeout = NewType("Timeout", int)
 PreviewSeconds = NewType("PreviewSeconds", float)
 TitanElement = Literal["earth", "water", "fire", "light", "dark", "elarit"]
-TitanRole = Literal["tank", "archer", "summomer", "super", "support"]
+TitanRole = Literal["tank", "archer", "summoner", "super", "support"]

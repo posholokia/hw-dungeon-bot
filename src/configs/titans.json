@@ -35,7 +35,7 @@
         ],
         "name": "Тидус",
         "element": "water",
-        "role": "summomer",
+        "role": "summoner",
         "position": 13
     },
     {
@@ -87,7 +87,7 @@
         ],
         "name": "Ашерона",
         "element": "fire",
-        "role": "summomer",
+        "role": "summoner",
         "position": 17
     },
     {
@@ -178,7 +178,7 @@
         ],
         "name": "Вердок",
         "element": "earth",
-        "role": "summomer",
+        "role": "summoner",
         "position": 11
     },
     {

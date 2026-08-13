@@ -7,9 +7,9 @@ from domain.types import (
     CoordinateList,
     ElementPositions,
     FingerPrintList,
+    RoomElements,
     RoomPosition,
     Timeout,
-    RoomElements,
 )
 from exceptions import RetryApplicationError, StopApplicationError
 from services.fingerprint_match import match_fingerprint

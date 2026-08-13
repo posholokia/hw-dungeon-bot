@@ -1,4 +1,5 @@
 from threading import Event
+
 from domain.types import PreviewSeconds
 from interfaces.output import IMouseClick
 from models.dto import ClickArea
@@ -19,6 +20,6 @@ class BattleSelectorService:
         self._clicker.mouse_click(
             self._autobattle_button.c,
             self._autobattle_button.width,
-            self._autobattle_button.height
+            self._autobattle_button.height,
         )
         stop_event.wait(self._preview_seconds)

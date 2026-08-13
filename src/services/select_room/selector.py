@@ -4,7 +4,7 @@ from threading import Event
 
 from structlog import getLogger
 
-from domain.types import ElementPosition, PreviewSeconds, RoomPosition, RoomElement
+from domain.types import ElementPosition, PreviewSeconds, RoomElement, RoomPosition
 from interfaces.output import IMouseClick
 from models.dto import ClickArea, State
 

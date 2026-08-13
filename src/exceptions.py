@@ -12,7 +12,6 @@ class ApplicationError(StopApplicationError):
 
 class BadBattleResult(RetryApplicationError):
     """Бой проигран/умер титан/плохой результат боя"""
-    pass
 
 
 ################## DEPRECATED ERRORS ###################

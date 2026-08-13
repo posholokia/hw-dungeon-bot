@@ -52,11 +52,11 @@ class SelectRoomUseCase:
         Калиброка выполняется единожды после запуска бота.
         """
         if state.current_level == 1:
-            # если самая первая комната окажется слева/справа 
-            # не получится корректно откалибровать, 
+            # если самая первая комната окажется слева/справа
+            # не получится корректно откалибровать,
             # так как не различить 5 и 6 комнату или 0 и 1
             return
-        
+
         if room_position == "left" and state.current_level % 10 != 0:
             state.calibrate_current_level(10)
         elif room_position == "right" and state.current_level % 10 != 5:

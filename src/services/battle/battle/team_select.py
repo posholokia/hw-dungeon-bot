@@ -6,7 +6,7 @@ from services.titan_catalog import TitanCatalog
 
 class TeamSelectService:
     def __init__(
-        self, 
+        self,
         titan_catalog: TitanCatalog,
         selected_click_areas: list[ClickArea],
         selection_cfg: SelectionConfig,
@@ -19,7 +19,7 @@ class TeamSelectService:
 
     def select_team(self, current_team: set[str], expected_team: set[str]) -> None:
         current_titans, expected_titans = self._load_titans(current_team, expected_team)
-        
+
         # убираем лишних титанов
         click_order = self._click_position_order(current_titans, expected_titans)
         for click_area_idx in click_order:
@@ -28,12 +28,13 @@ class TeamSelectService:
 
         # выбираем недостающих титанов
         missing = set(expected_titans) - set(current_titans)
-        
+
         for titan in missing:
             self._select_titan(titan)
-        
 
-    def _load_titans(self, current_team: set[str], expected_team: set[str]) -> tuple[list[Titan], list[Titan]]:
+    def _load_titans(
+        self, current_team: set[str], expected_team: set[str]
+    ) -> tuple[list[Titan], list[Titan]]:
         current_titan_team: list[Titan] = []
         expected_titan_team: list[Titan] = []
 
@@ -46,12 +47,14 @@ class TeamSelectService:
 
         return current_titan_team, expected_titan_team
 
-    def _click_position_order(self, current_titans: list[Titan], expected_titans: list[Titan]) -> list[int]:
+    def _click_position_order(
+        self, current_titans: list[Titan], expected_titans: list[Titan]
+    ) -> list[int]:
         current_positions = {t.position for t in current_titans}
         expected_positions = {t.position for t in expected_titans}
         all_positions = list(current_positions) + list(expected_positions)
         all_positions.sort()
-        
+
         click_order = []
         c = 0
 
@@ -64,7 +67,7 @@ class TeamSelectService:
             elif pos not in expected_positions and pos in current_positions:
                 click_order.append(c)
                 continue
-        
+
         return click_order
 
     def _select_titan(self, titan: Titan) -> None:
@@ -78,7 +81,9 @@ class TeamSelectService:
         titan_area = self._selection_cfg.titan
 
         self._clicker.mouse_click(filter_area.c, filter_area.width, filter_area.height)
-        self._clicker.mouse_click(element_area.c, element_area.width, element_area.height)
+        self._clicker.mouse_click(
+            element_area.c, element_area.width, element_area.height
+        )
         self._clicker.mouse_click(role_area.c, role_area.width, role_area.height)
         self._clicker.mouse_click(filter_area.c, filter_area.width, filter_area.height)
         self._clicker.mouse_click(titan_area.c, titan_area.width, titan_area.height)
