@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass
 from threading import Event
 
@@ -36,7 +37,8 @@ class BotOrchestration:
     def run(self, stop_event: Event) -> None:
         state = State()
         battle_state = BattleState(
-            teams=self._cfg.teams, healing_team=self._cfg.healing_team
+            teams=copy.deepcopy(self._cfg.teams),
+            healing_team=copy.deepcopy(self._cfg.healing_team),
         )
 
         while not stop_event.is_set():

@@ -1,10 +1,10 @@
-from copy import copy
+from copy import deepcopy
 from dataclasses import dataclass, field
 from logging import Logger
 
-from domain.types import RoomElement
 from structlog import getLogger
 
+from domain.types import RoomElement
 
 logger: Logger = getLogger(__name__)
 
@@ -23,20 +23,28 @@ class BattleState:
 
         if self.need_healing and not self.__team_index and element == "common":
             titan: str = next(iter(self.need_healing))
-            team = copy(self.healing_team)
+            team = self._get_healing_team()
             team.append(titan)
             self.current_team = team
         else:
             try:
-                teams = self.teams[self.__room_element]
+                teams = self._get_element_teams()
                 logger.debug(
                     f"Выбор команды: element: {element}, "
                     f"команды: {teams}, index: {self.__team_index}"
                 )
                 self.current_team = teams[self.__team_index]
             except IndexError:
-                logger.debug(f"Команда не найдена")
+                logger.debug("Команда не найдена")
                 self.current_team = []
+
+    def _get_element_teams(self) -> list[list[str]]:
+        teams = deepcopy(self.teams)
+        assert self.__room_element
+        return teams[self.__room_element]
+
+    def _get_healing_team(self) -> list[str]:
+        return deepcopy(self.healing_team)
 
     def clear(self) -> None:
         logger.debug("Очистка состояния боя")
@@ -48,7 +56,8 @@ class BattleState:
         logger.debug("Бой проигран")
         self.__team_index += 1
         try:
-            teams = self.teams[self.__room_element]
+            assert self.__room_element
+            teams = self._get_element_teams()
             logger.debug(
                 f"Выбор команды: element: {self.__room_element}, "
                 f"команды: {teams}, index: {self.__team_index}"
@@ -56,7 +65,7 @@ class BattleState:
             assert self.__room_element
             self.current_team = teams[self.__team_index]
         except IndexError:
-            logger.debug(f"Команда не найдена")
+            logger.debug("Команда не найдена")
             self.current_team = []
 
 
