@@ -6,7 +6,6 @@ from core.logger.processors.overlay import OverlayProcessor
 from core.logger.setup import setup_logging
 from models.dto import State
 from services.battle.battle.scaner import BattleScannerService
-from services.floor_transit import FloorTransitService
 from widgets.qa_app import QaApp
 
 state = State()
@@ -37,5 +36,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

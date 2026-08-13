@@ -48,7 +48,7 @@ class BattleScannerService:
             for name, titan in catalog.items():
                 matched = match_fingerprint(fingerprint, titan.fingerprint)
                 time.sleep(0.1)
-                
+
                 if matched:
                     logger.info(f"Обнаружен титан: {name}, команда: {current_team}")
 
