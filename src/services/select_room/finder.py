@@ -11,7 +11,7 @@ from domain.types import (
     RoomPosition,
     Timeout,
 )
-from exceptions import RetryApplicationError, StopApplicationError
+from exceptions import ApplicationError
 from services.fingerprint_match import match_fingerprint
 from vision.screen import take_print
 
@@ -44,7 +44,7 @@ class RoomFinderService:
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():
-                raise StopApplicationError("Stop application")
+                return
 
             position = self._find_any_room()
             if position is not None:
@@ -52,9 +52,9 @@ class RoomFinderService:
                 return position
 
             if stop_event.wait(timeout=0.005):
-                raise StopApplicationError("Stop application")
+                return
 
-        raise StopApplicationError("Room not found")
+        raise ApplicationError("Room not found")
 
     def find_elements(self, stop_event: Event) -> dict[RoomElements, ElementPositions]:
         start = time.perf_counter()
@@ -62,7 +62,7 @@ class RoomFinderService:
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():
-                raise StopApplicationError("Stop application")
+                return
 
             found = self._find_all_elements()
             if found:
@@ -70,9 +70,9 @@ class RoomFinderService:
                 return found
 
             if stop_event.wait(timeout=0.005):
-                raise RetryApplicationError()
+                return
 
-        raise StopApplicationError("No elements found")
+        raise ApplicationError("No elements found")
 
     def _find_any_room(self) -> RoomPosition | None:
         for position in _POSITIONS:

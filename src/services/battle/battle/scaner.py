@@ -5,7 +5,7 @@ from threading import Event
 from structlog import getLogger
 
 from domain.types import CoordinateList, FingerPrint, Timeout
-from exceptions import StopApplicationError
+from exceptions import ApplicationError
 from models.dto import Titan
 from services.fingerprint_match import match_fingerprint
 from services.titan_catalog import TitanCatalog
@@ -71,7 +71,7 @@ class BattleScannerService:
             if stop_event.wait(timeout=0.005):
                 return
 
-        raise StopApplicationError("Не найдена кнопка автобоя")
+        raise ApplicationError("Не найдена кнопка автобоя")
 
     def scan_win_loose(self, stop_event: Event) -> bool:
         """
@@ -80,18 +80,22 @@ class BattleScannerService:
         """
         start = time.perf_counter()
         logger.info("Waiting for win/lose screen")
+
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():
                 return
 
             scanned = take_print(self._result_coordinates)
+
             if match_fingerprint(scanned, self._result_fingerprints["win"]):
                 logger.info("Battle result: win")
                 return True
+
             if match_fingerprint(scanned, self._result_fingerprints["lose"]):
                 logger.info("Battle result: lose")
                 return False
 
             if stop_event.wait(0.005):
                 return
-        raise StopApplicationError("Не удалось сматчить экран результата боя")
+
+        raise ApplicationError("Не удалось сматчить экран результата боя")

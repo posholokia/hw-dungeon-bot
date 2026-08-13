@@ -3,7 +3,7 @@ from threading import Event
 from structlog import get_logger
 
 from domain.types import RoomPosition
-from exceptions import RetryApplicationError, StopApplicationError
+from exceptions import ApplicationError, RetryApplicationError
 from models.dto import State
 from services.battle.dto import BattleState
 from services.select_room.scaner import RoomFinderService
@@ -37,7 +37,7 @@ class SelectRoomUseCase:
             elements = self._finder.find_elements(stop_event)
             logger.debug(f"Элементы в комнате: {elements}")
             self._selector.select_room_element(state, battle_state, elements)
-        except StopApplicationError:
+        except ApplicationError:
             raise
         except Exception as e:
             logger.exception(e.__str__())

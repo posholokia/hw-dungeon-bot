@@ -3,7 +3,7 @@ from threading import Event
 
 from configs.settings import ButtonConfig, FloorTransitConfig
 from domain.types import Timeout
-from exceptions import StopApplicationError
+from exceptions import ApplicationError
 from interfaces.output import IMouseClick
 from models.dto import State
 from services.fingerprint_match import match_fingerprint
@@ -27,7 +27,7 @@ class FloorTransitService:
         elif state.current_level % 10 == 5:
             button = self._buttons_cfg.right
         else:
-            raise StopApplicationError()
+            raise ApplicationError()
 
         self.__click(button, stop_event)
         self.__click(self._buttons_cfg.ok, stop_event)

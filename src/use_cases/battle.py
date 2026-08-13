@@ -2,7 +2,7 @@ from threading import Event
 
 from structlog import getLogger
 
-from exceptions import StopApplicationError
+from exceptions import ApplicationError
 from services.battle.battle.dead_scaner import DeadScanService
 from services.battle.battle.healing import HealthObserveService
 from services.battle.battle.health_scaner import HealthScanerService
@@ -84,7 +84,7 @@ class BattleUseCase:
         expected_team = set(battle_state.current_team)
 
         if not expected_team:
-            raise StopApplicationError("Все команды провалили бой")
+            raise ApplicationError("Все команды провалили бой")
 
         current_team = self._scaner.scan_team()
         logger.info(f"Текущая команда титанов: {current_team}")
@@ -97,7 +97,7 @@ class BattleUseCase:
             tries += 1
 
             if tries >= 5:
-                raise StopApplicationError("Не удалось выбрать команду после 5 попыток")
+                raise ApplicationError("Не удалось выбрать команду после 5 попыток")
 
             if stop_event.is_set():
-                raise StopApplicationError()
+                raise ApplicationError()
