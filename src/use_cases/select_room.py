@@ -4,7 +4,9 @@ from structlog import get_logger
 
 from domain.types import RoomPosition
 from exceptions import RetryApplicationError, StopApplicationError
+from interfaces.output import IMouseClick
 from models.dto import State
+from services.battle.dto import BattleState
 from services.select_room.scaner import RoomFinderService
 from services.select_room.selector import SelectRoomService
 
@@ -18,11 +20,16 @@ class SelectRoomUseCase:
         self,
         finder: RoomFinderService,
         selector: SelectRoomService,
+        clicker: IMouseClick,
     ) -> None:
         self._finder = finder
         self._selector = selector
+        self._clicker = clicker
 
-    def execute(self, state: State, stop_event: Event) -> None:
+    def execute(
+        self, state: State, battle_state: BattleState, stop_event: Event
+    ) -> None:
+        self._clicker.mouse_click((500, 500))
         try:
             # обнаружение и клик на комнату
             room_position = self._finder.find_room(stop_event)
@@ -33,7 +40,9 @@ class SelectRoomUseCase:
             # обнаружение и выбор элемента в комнате
             elements = self._finder.find_elements(stop_event)
             logger.debug(f"Элементы в комнате: {elements}")
-            self._selector.select_room_element(state, elements, stop_event)
+            self._selector.select_room_element(
+                state, battle_state, elements, stop_event
+            )
         except StopApplicationError:
             raise
         except Exception as e:

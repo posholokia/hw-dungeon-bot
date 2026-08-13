@@ -7,6 +7,7 @@ from structlog import getLogger
 from domain.types import ElementPosition, PreviewSeconds, RoomElement, RoomPosition
 from interfaces.output import IMouseClick
 from models.dto import ClickArea, State
+from services.battle.dto import BattleState
 
 logger = getLogger(__name__)
 
@@ -33,10 +34,11 @@ class SelectRoomService:
     def select_room_element(
         self,
         state: State,
+        battle_state: BattleState,
         elements: dict[RoomElement, ElementPosition],
         stop_event: Event,
     ) -> None:
-        if state.need_healing and "common" in elements:
+        if battle_state.need_healing and "common" in elements:
             area = self._click_areas[elements["common"]]
             self._click_service.mouse_click((area.x, area.y), area.width, area.height)
         else:

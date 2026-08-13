@@ -41,7 +41,7 @@ class BotOrchestration:
 
         while not stop_event.is_set():
             try:
-                self._select_room.execute(state, stop_event)
+                self._select_room.execute(state, battle_state, stop_event)
                 battle_state.start(element=state.room_element)
                 battle_state, replay = self._battle.execute(battle_state, stop_event)
 

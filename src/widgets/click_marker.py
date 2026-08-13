@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from PySide6.QtCore import QPoint, Qt, QTimer, Signal
+from PySide6.QtCore import QPoint, Qt, QTimer, Signal, Slot
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 from structlog import getLogger
@@ -31,13 +31,17 @@ class ClickMarker(QWidget):
         self._hide_timer = QTimer(self)
         self._hide_timer.setSingleShot(True)
         self._hide_timer.timeout.connect(self.hide)
-        self._flash_signal.connect(self._flash_impl)
+        self._flash_signal.connect(
+            self._flash_impl,
+            Qt.ConnectionType.QueuedConnection,
+        )
 
     def flash_at(self, x: int, y: int) -> None:
         """Показать маркер на экране в точке (x, y)"""
         logger.info(f"Показать маркер на экране в точке ({x}, {y})")
         self._flash_signal.emit(x, y)
 
+    @Slot(int, int)
     def _flash_impl(self, x: int, y: int) -> None:
         self.move(x - self._SIZE // 2, y - self._SIZE // 2)
         self.show()
