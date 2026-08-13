@@ -61,7 +61,7 @@ class BotOrchestration:
                     return
 
                 logger.info(f"Пройдено {state.levels_completed} уровней")
-
+                logger.debug(f"Текущий уровень: {state.current_level}")
             except StopApplicationError as e:
                 battle_state.clear()
                 logger.info(e.__str__())
