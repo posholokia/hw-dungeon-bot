@@ -93,13 +93,14 @@ class BattleUseCase:
             return
 
         expected_team = set(battle_state.current_team)
-
         current_team = self._scaner.scan_team()
-        logger.info(f"Текущая команда титанов: {current_team}")
-
         tries = 0
 
         while current_team != expected_team:
+            logger.info(
+                f"Текущая команда титанов: {current_team}, "
+                f"Ожидаемая команда: {expected_team}"
+            )
             self._select_service.select_team(current_team, expected_team)
             current_team = self._scaner.scan_team()
             tries += 1

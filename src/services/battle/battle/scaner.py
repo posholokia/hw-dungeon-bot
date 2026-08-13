@@ -49,12 +49,11 @@ class BattleScannerService:
                 matched = match_fingerprint(fingerprint, titan.fingerprint)
 
                 if matched:
-                    logger.info(f"Обнаружен титан: {name}, команда: {current_team}")
-
                     if titan.name == "<EMPTY>":
                         continue
 
                     current_team.add(name)
+                    logger.info(f"Обнаружен титан: {name}, команда: {current_team}")
                     break
 
         return current_team
