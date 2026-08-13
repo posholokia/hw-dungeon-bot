@@ -17,10 +17,12 @@ class SelectRoomService:
     def __init__(
         self,
         click_areas: dict[RoomPosition, ClickArea],
+        element_areas: dict[ElementPosition, ClickArea],
         click_service: IMouseClick,
     ) -> None:
         self._click_areas = click_areas
         self._click_service = click_service
+        self._element_areas = element_areas
 
     def click_room(self, position: RoomPosition) -> None:
         area = self._click_areas[position]

@@ -164,6 +164,7 @@ class DiContainer:
             return SelectRoomService(
                 click_areas=click_areas,
                 click_service=click_service,
+                element_areas=self._config.selection.click_area,
             )
 
         def build_titan_catalog_service() -> TitanCatalog:
