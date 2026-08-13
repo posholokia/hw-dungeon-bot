@@ -43,6 +43,10 @@ class State:
     def current_level(self) -> int:
         return self._current_level
 
+    @current_level.setter
+    def current_level(self, value: int) -> None:
+        self._current_level = value
+
     @property
     def current_level_calibrated(self) -> bool:
         return self._current_level_calibrated

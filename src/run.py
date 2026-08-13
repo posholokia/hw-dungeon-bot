@@ -40,6 +40,8 @@ class BotOrchestration:
             teams=copy.deepcopy(self._cfg.teams),
             healing_team=copy.deepcopy(self._cfg.healing_team),
         )
+        level = input("Текущий уровень: ")
+        state.current_level = int(level)
 
         while not stop_event.is_set():
             try:
@@ -51,10 +53,10 @@ class BotOrchestration:
                     battle_state.lose()
                     continue
 
-                self._win(battle_state, state)
                 self._floor_service.transit(state, stop_event)
+                self._win(battle_state, state)
 
-                if state.levels_completed >= 10:
+                if state.levels_completed >= 100:
                     logger.info("Лимит уровней пройден")
                     return
 

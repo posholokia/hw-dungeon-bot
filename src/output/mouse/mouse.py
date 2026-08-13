@@ -24,7 +24,7 @@ class MouseController(IMouseClick):
         else:
             x = c[0]
             y = c[1]
-        time.sleep(random.uniform(0.086, 0.134))
+        time.sleep(random.uniform(0.256, 0.434))
         self._mouse.position = (x, y)
         self._mouse.click(Button.left)
         logger.debug(f"Клик мышью по координатам: x={x}, y={y}")
