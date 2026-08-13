@@ -52,6 +52,10 @@ class TeamSelectService:
             if titan.name in expected_team:
                 expected_titan_team.append(titan)
 
+        for _ in range(len(expected_team) - 5):
+            plug = self._catalog.get_titan_by_name("<EMPTY>")
+            expected_titan_team.append(plug)
+
         return current_titan_team, expected_titan_team
 
     def _click_position_order(

@@ -36,7 +36,6 @@ class Titan(BaseModel):
 class State:
     _levels_completed: int = field(default=0, init=False)
     _current_level: int = field(default=1, init=False)
-    _current_level_calibrated: bool = field(default=False, init=False)
     _room_element: RoomElement | None = field(default=None, init=False)
 
     @property
@@ -46,10 +45,6 @@ class State:
     @current_level.setter
     def current_level(self, value: int) -> None:
         self._current_level = value
-
-    @property
-    def current_level_calibrated(self) -> bool:
-        return self._current_level_calibrated
 
     @property
     def levels_completed(self) -> int:
@@ -67,14 +62,3 @@ class State:
     def up_level(self) -> None:
         self._levels_completed += 1
         self._current_level += 1
-
-    def calibrate_current_level(self, level: int) -> None:
-        """
-        Калибровка текущего уровня. Калибровка выполняется только на крайней
-        комнате этажа (последняя цифра уровня 5 или 0).
-        Если переданный уровень не является крайней комнатой, то калибровка не выполняется.
-        """
-        if level != 5 and level != 10:
-            return
-        self._current_level_calibrated = True
-        self._current_level = level

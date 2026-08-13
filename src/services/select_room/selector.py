@@ -11,7 +11,7 @@ logger = getLogger(__name__)
 
 
 class SelectRoomService:
-    PRIORITY: tuple[RoomElement, ...] = ("water", "earth", "common", "fire")
+    PRIORITY: tuple[RoomElement, ...] = ("common", "water", "earth", "fire")
     """Сервис выбора комнаты."""
 
     def __init__(

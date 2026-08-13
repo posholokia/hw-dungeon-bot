@@ -62,7 +62,6 @@ class BotOrchestration:
 
                 logger.info(f"Пройдено {state.levels_completed} уровней")
                 logger.debug(f"Текущий уровень: {state.current_level}")
-                logger.debug(f"Калибровка уровня: {state.current_level_calibrated}")
             except StopApplicationError as e:
                 battle_state.clear()
                 logger.info(e.__str__())

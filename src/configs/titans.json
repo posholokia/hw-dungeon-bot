@@ -218,6 +218,6 @@
         "name": "<EMPTY>",
         "element": "light",
         "role": "support",
-        "position": 0
+        "position": 1000
     }
 ]
