@@ -16,7 +16,7 @@ class BattleState:
     def start(self, element: RoomElement) -> None:
         self.__room_element = element
 
-        if need_heal := self.need_healing and not self.__team_index:
+        if (need_heal := self.need_healing) and not self.__team_index:
             titan: str = next(iter(need_heal))
             team = copy(self.healing_team)
             team.append(titan)
@@ -35,6 +35,7 @@ class BattleState:
     def lose(self) -> None:
         self.__team_index += 1
         try:
+            assert self.__room_element
             self.current_team = self.teams[self.__room_element][self.__team_index]
         except IndexError:
             self.current_team = []
@@ -43,5 +44,5 @@ class BattleState:
 @dataclass
 class TitanStatus:
     name: str
-    health: int
-    energy: int
+    health: float
+    energy: float

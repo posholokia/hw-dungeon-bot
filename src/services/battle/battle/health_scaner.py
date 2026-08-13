@@ -4,6 +4,7 @@ from structlog import getLogger
 
 from configs.settings import BarConfig
 from domain.types import Coordinate, CoordinateList, FingerPrint
+from models.dto import Titan
 from services.battle.dto import BattleState, TitanStatus
 from services.titan_catalog import TitanCatalog
 from vision.screen import take_print
@@ -39,7 +40,7 @@ class HealthScanerService:
         team_len = len(battle_state.current_team)
         windows = self._windows[team_len]
         result: list[TitanStatus] = []
-        team: list[TitanStatus] = []
+        team: list[Titan] = []
         # нужно отсортировать команду по позициям,
         # чтобы корректно сопоставить сканируемое окно с титаном
         for titan_name in battle_state.current_team:

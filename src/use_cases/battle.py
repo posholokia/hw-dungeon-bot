@@ -2,7 +2,7 @@ from threading import Event
 
 from structlog import getLogger
 
-from exceptions import ApplicationError
+from exceptions import ApplicationError, StopApplicationError
 from services.battle.battle.dead_scaner import DeadScanService
 from services.battle.battle.healing import HealthObserveService
 from services.battle.battle.health_scaner import HealthScanerService
@@ -68,6 +68,10 @@ class BattleUseCase:
             logger.info("Переигровка уровня: умер титан")
             self._replay_service.replay(lose=False, stop_event=stop_event)
             return battle_state, True
+
+        # ожидаем, так как анимация перекрывает полоски здоровья/энергии
+        if stop_event.wait(2):
+            raise StopApplicationError()
 
         health_list = self._health_scaner.scan_health(battle_state)
         need_replay = self._replay_service.check_replay_condition(health_list)

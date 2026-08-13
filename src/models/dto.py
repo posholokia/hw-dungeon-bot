@@ -52,7 +52,8 @@ class State:
         return self._levels_completed
 
     @property
-    def room_element(self) -> RoomElement | None:
+    def room_element(self) -> RoomElement:
+        assert self._room_element
         return self._room_element
 
     @room_element.setter
@@ -71,5 +72,5 @@ class State:
         """
         if level != 5 and level != 10:
             return
-        self.current_level_calibrated = True
-        self.current_level = level
+        self._current_level_calibrated = True
+        self._current_level = level

@@ -35,12 +35,12 @@ class SelectRoomService:
         elements: dict[RoomElement, ElementPosition],
     ) -> None:
         if battle_state.need_healing and "common" in elements:
-            area = self._click_areas[elements["common"]]
+            area = self._element_areas[elements["common"]]
             self._click_service.mouse_click((area.x, area.y), area.width, area.height)
         else:
             for element in self.PRIORITY:
                 if element in elements:
-                    area = self._click_areas[elements[element]]
+                    area = self._element_areas[elements[element]]
                     self._click_service.mouse_click(
                         (area.x, area.y), area.width, area.height
                     )

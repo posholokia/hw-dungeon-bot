@@ -6,7 +6,7 @@ from vision.screen import take_print
 class DeadScanService:
     def __init__(
         self,
-        windows: dict[str, CoordinateList],
+        windows: dict[int, CoordinateList],
         offsets: CoordinateList,
         fingerprint: FingerPrint,
     ) -> None:

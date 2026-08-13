@@ -5,7 +5,7 @@ from threading import Event
 from structlog import getLogger
 
 from domain.types import CoordinateList, FingerPrint, Timeout
-from exceptions import ApplicationError
+from exceptions import ApplicationError, StopApplicationError
 from models.dto import Titan
 from services.fingerprint_match import match_fingerprint
 from services.titan_catalog import TitanCatalog
@@ -35,7 +35,7 @@ class BattleScannerService:
 
     def scan_team(self) -> set[str]:
         time.sleep(1)
-        current_team = set()
+        current_team: set[str] = set()
         catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
 
         for coords in self._analyze_team_coords:
@@ -83,7 +83,7 @@ class BattleScannerService:
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():
-                return
+                raise StopApplicationError()
 
             scanned = take_print(self._result_coordinates)
 
@@ -96,6 +96,6 @@ class BattleScannerService:
                 return False
 
             if stop_event.wait(0.005):
-                return
+                raise StopApplicationError()
 
         raise ApplicationError("Не удалось сматчить экран результата боя")
