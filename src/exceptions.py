@@ -6,7 +6,7 @@ class RetryApplicationError(Exception):
     """Ошибка приложения, которая приводит к повторной попытке выполнения."""
 
 
-class ApplicationError(StopApplicationError):
+class ApplicationError(RetryApplicationError):
     pass
 
 
