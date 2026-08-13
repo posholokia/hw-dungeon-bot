@@ -1,12 +1,18 @@
 import time
+from logging import Logger
 from threading import Event
+
+from structlog import getLogger
 
 from configs.settings import ButtonConfig, FloorTransitConfig
 from domain.types import Timeout
+from exceptions import ApplicationError
 from interfaces.output import IMouseClick
 from models.dto import State
 from services.fingerprint_match import match_fingerprint
 from vision.screen import take_print
+
+logger: Logger = getLogger(__name__)
 
 
 class FloorTransitService:
@@ -28,7 +34,9 @@ class FloorTransitService:
         else:
             return
 
+        logger.debug(f"Переход по этажу, уровень: {state.current_level}")
         self.__click(button, stop_event)
+        logger.debug("Подтверждение награды")
         self.__click(self._buttons_cfg.ok, stop_event)
 
     def __click(self, cfg: ButtonConfig, stop_event: Event) -> None:
@@ -47,3 +55,5 @@ class FloorTransitService:
 
             if stop_event.wait(timeout=0.005):
                 return
+
+        raise ApplicationError("Не удалось сматчить кнопку")
