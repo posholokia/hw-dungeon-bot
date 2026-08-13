@@ -52,16 +52,15 @@ class BotOrchestration:
                     continue
 
                 self._win(battle_state, state)
+                self._floor_service.transit(state, stop_event)
 
-                if state.current_level % 10 == 0 or state.current_level % 10 == 5:
-                    self._floor_service.transit(state, stop_event)
-
-                if state.levels_completed >= 1000:
+                if state.levels_completed >= 10:
                     logger.info("Лимит уровней пройден")
                     return
 
                 logger.info(f"Пройдено {state.levels_completed} уровней")
                 logger.debug(f"Текущий уровень: {state.current_level}")
+                logger.debug(f"Калибровка уровня: {state.current_level_calibrated}")
             except StopApplicationError as e:
                 battle_state.clear()
                 logger.info(e.__str__())

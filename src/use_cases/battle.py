@@ -1,3 +1,4 @@
+import random
 from threading import Event
 
 from structlog import getLogger
@@ -70,7 +71,7 @@ class BattleUseCase:
             return battle_state, True
 
         # ожидаем, так как анимация перекрывает полоски здоровья/энергии
-        if stop_event.wait(2):
+        if stop_event.wait(random.uniform(1.2, 2.2)):
             raise StopApplicationError()
 
         health_list = self._health_scaner.scan_health(battle_state)

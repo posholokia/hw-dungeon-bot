@@ -6,7 +6,7 @@ from configs.settings import get_settings
 from core.logger.processors.overlay import OverlayProcessor
 from domain.types import PreviewSeconds, Timeout
 from interfaces.output import IMouseClick
-from output.mouse.designation import DesignationClick
+from output.mouse.mouse import MouseController
 from run import BattleStateCfg, BotOrchestration
 from services.battle.battle.dead_scaner import DeadScanService
 from services.battle.battle.healing import HealthObserveService
@@ -95,14 +95,15 @@ class DiContainer:
             build_overlay_processor, OverlayProcessor
         )
 
-        def build_designation_click(context: ActivationScope) -> DesignationClick:
-            marker = lambda: context.get(ClickMarker)
-            preview = context.get(PreviewSeconds)
-            return DesignationClick(marker=marker, preview_seconds=preview)
+        # def build_designation_click(context: ActivationScope) -> DesignationClick:
+        #     marker = lambda: context.get(ClickMarker)
+        #     preview = context.get(PreviewSeconds)
+        #     return DesignationClick(marker=marker, preview_seconds=preview)
 
-        self._container.register_factory(
-            build_designation_click, IMouseClick, life_style=ServiceLifeStyle.TRANSIENT
-        )
+        # self._container.register_factory(
+        #     build_designation_click, IMouseClick, life_style=ServiceLifeStyle.TRANSIENT
+        # )
+        self._container.register(IMouseClick, MouseController)
 
         def build_dead_scaner() -> DeadScanService:
             return DeadScanService(

@@ -60,9 +60,9 @@ class SelectRoomUseCase:
             # так как не различить 5 и 6 комнату или 0 и 1
             return
 
-        if room_position == "left" and state.current_level % 10 != 0:
+        if room_position == "right" and state.current_level % 10 != 0:
             state.calibrate_current_level(10)
-        elif room_position == "right" and state.current_level % 10 != 5:
+        elif room_position == "left" and state.current_level % 10 != 5:
             state.calibrate_current_level(5)
         else:
             # эта ветка нужна на случай если бот начал работу с 1 комнаты этажа
