@@ -37,7 +37,7 @@ class BattleScannerService:
         self._clicker = clicker
 
     def scan_team(self) -> set[str]:
-        time.sleep(1)
+        time.sleep(1.5)
         current_team: set[str] = set()
         catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
         self._clicker.hide_mouse()
@@ -47,7 +47,8 @@ class BattleScannerService:
 
             for name, titan in catalog.items():
                 matched = match_fingerprint(fingerprint, titan.fingerprint)
-
+                time.sleep(0.1)
+                
                 if matched:
                     logger.info(f"Обнаружен титан: {name}, команда: {current_team}")
 

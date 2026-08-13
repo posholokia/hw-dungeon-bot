@@ -5,6 +5,7 @@ from core.depends.container import get_container
 from core.logger.processors.overlay import OverlayProcessor
 from core.logger.setup import setup_logging
 from models.dto import State
+from services.battle.battle.scaner import BattleScannerService
 from services.floor_transit import FloorTransitService
 from widgets.qa_app import QaApp
 
@@ -13,19 +14,20 @@ state.current_level = 5
 
 
 def _run_bot(
-    runner: FloorTransitService,
+    runner: BattleScannerService,
     stop_event: Event,
     overlay: OverlayProcessor,
 ) -> None:
     setup_logging(overlay)
-    runner.transit(state, stop_event)
+    res = runner.scan_team()
+    print(f"{res=}")
 
 
 def main() -> None:
     container = get_container()
     stop_event = Event()
 
-    bot_runner = container.get(FloorTransitService)
+    bot_runner = container.get(BattleScannerService)
     qa_app = container.get(QaApp)
     overlay = container.get(OverlayProcessor)
 
@@ -35,3 +37,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
