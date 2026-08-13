@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """PyInstaller spec for hw-dungeon-bot (Windows/Linux onefile)."""
 
-datas = [("src/configs/settings.json", "src/configs/titans.json", "configs")]
+datas = [("src/configs/settings.json", "configs"), ("src/configs/titans.json", "configs")]
 hiddenimports = [
     # pynput backends (OS-specific; unused ones are simply missing at runtime)
     "pynput.keyboard._win32",
