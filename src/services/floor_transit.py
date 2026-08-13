@@ -2,7 +2,7 @@ import time
 from threading import Event
 
 from configs.settings import ButtonConfig, FloorTransitConfig
-from domain.types import PreviewSeconds, Timeout
+from domain.types import Timeout
 from exceptions import StopApplicationError
 from interfaces.output import IMouseClick
 from models.dto import State
@@ -16,12 +16,10 @@ class FloorTransitService:
         buttons_cfg: FloorTransitConfig,
         clicker: IMouseClick,
         timeout: Timeout,
-        preview_seconds: PreviewSeconds,
     ) -> None:
         self._buttons_cfg = buttons_cfg
         self._clicker = clicker
         self._timeout = timeout
-        self._preview = preview_seconds
 
     def transit(self, state: State, stop_event: Event) -> None:
         if state.current_level % 10 == 0:
@@ -46,6 +44,7 @@ class FloorTransitService:
             if match_fingerprint(fingerprint, cfg.fingerprint):
                 area = cfg.click_area
                 self._clicker.mouse_click(area.c, area.width, area.height)
-                stop_event.wait(self._preview)
+                return
 
-            stop_event.wait(0.005)
+            if stop_event.wait(timeout=0.005):
+                return

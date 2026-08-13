@@ -45,8 +45,12 @@ class BattleScannerService:
                 matched = match_fingerprint(fingerprint, titan.fingerprint)
 
                 if matched:
+                    logger.info(f"Обнаружен титан: {name}, команда: {current_team}")
+
+                    if titan.name == "<EMPTY>":
+                        continue
+
                     current_team.add(name)
-                    del catalog[name]
                     break
 
         return current_team

@@ -51,8 +51,10 @@ class BattleUseCase:
         Returns:
             Данные проведения боя и флаг необходимости переигровки (True - переиграть, False - бой успешен)
         """
+        # ожидание кнопки автобоя, чтобы убедиться что сейчас на нужном экране
+        self._scaner.scan_autobattle(stop_event)
         self.__select_team(battle_state, stop_event)
-        self.__autobattle(stop_event)
+        self._selector.click_autobattle(stop_event)
         win = self._scaner.scan_win_loose(stop_event)
 
         if not win:
@@ -71,7 +73,6 @@ class BattleUseCase:
         need_replay = self._replay_service.check_replay_condition(health_list)
 
         if need_replay:
-            logger.info("Переигровка уровня: по условию")
             self._replay_service.replay(lose=False, stop_event=stop_event)
             return battle_state, True
 
@@ -86,6 +87,8 @@ class BattleUseCase:
             raise StopApplicationError("Все команды провалили бой")
 
         current_team = self._scaner.scan_team()
+        logger.info(f"Текущая команда титанов: {current_team}")
+
         tries = 0
 
         while current_team != expected_team:
@@ -98,7 +101,3 @@ class BattleUseCase:
 
             if stop_event.is_set():
                 raise StopApplicationError()
-
-    def __autobattle(self, stop_event: Event) -> None:
-        self._scaner.scan_autobattle(stop_event)
-        self._selector.click_autobattle(stop_event)

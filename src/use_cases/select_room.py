@@ -4,7 +4,6 @@ from structlog import get_logger
 
 from domain.types import RoomPosition
 from exceptions import RetryApplicationError, StopApplicationError
-from interfaces.output import IMouseClick
 from models.dto import State
 from services.battle.dto import BattleState
 from services.select_room.scaner import RoomFinderService
@@ -33,13 +32,11 @@ class SelectRoomUseCase:
             logger.debug(f"Room found at {room_position}")
             if not state.current_level_calibrated:
                 self._calibrate_current_level(state, room_position)
-            self._selector.click_room(room_position, stop_event)
+            self._selector.click_room(room_position)
             # обнаружение и выбор элемента в комнате
             elements = self._finder.find_elements(stop_event)
             logger.debug(f"Элементы в комнате: {elements}")
-            self._selector.select_room_element(
-                state, battle_state, elements, stop_event
-            )
+            self._selector.select_room_element(state, battle_state, elements)
         except StopApplicationError:
             raise
         except Exception as e:

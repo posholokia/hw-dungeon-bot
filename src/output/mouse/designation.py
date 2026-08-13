@@ -1,17 +1,21 @@
 import random
+import time
 from collections.abc import Callable
 
 from structlog import get_logger
 
-from domain.types import Coordinate, no_value
+from domain.types import Coordinate, PreviewSeconds, no_value
 from widgets.click_marker import ClickMarker
 
 logger = get_logger(__name__)
 
 
 class DesignationClick:
-    def __init__(self, marker: Callable[[], ClickMarker]) -> None:
+    def __init__(
+        self, marker: Callable[[], ClickMarker], preview_seconds: PreviewSeconds
+    ) -> None:
         self._marker_factory = marker
+        self._preview_seconds = preview_seconds
 
     def mouse_click(
         self, c: Coordinate, width: int = no_value, height: int = no_value
@@ -34,6 +38,7 @@ class DesignationClick:
                 y = c[1]
             marker = self._marker_factory()
             marker.flash_at(x, y)
+            time.sleep(self._preview_seconds)
         except ValueError:
             logger.error(f"Invalid coordinates: {c}, width: {width}, height: {height}")
             raise

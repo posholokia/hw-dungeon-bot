@@ -1,20 +1,24 @@
 from collections.abc import Callable
 
+from structlog import getLogger
+
 from configs.settings import BarConfig
 from domain.types import Coordinate, CoordinateList, FingerPrint
 from services.battle.dto import BattleState, TitanStatus
 from services.titan_catalog import TitanCatalog
 from vision.screen import take_print
 
+logger = getLogger(__name__)
+
 
 def is_green(rgb: tuple[int, int, int]) -> bool:
     r, g, b = rgb
-    return r <= 77 and g >= 199 and b <= 49
+    return r <= 77 and g >= 189 and b <= 49
 
 
 def is_yellow(rgb: tuple[int, int, int]) -> bool:
     r, g, b = rgb
-    return r == 277 and g == 199 and b == 28
+    return 194 <= r <= 247 and 171 <= g <= 219 and b <= 39
 
 
 class HealthScanerService:
@@ -31,10 +35,11 @@ class HealthScanerService:
         self._catalog = titan_catalog
 
     def scan_health(self, battle_state: BattleState) -> list[TitanStatus]:
+        logger.info("Анализ здоровья/энергии после боя")
         team_len = len(battle_state.current_team)
         windows = self._windows[team_len]
         result: list[TitanStatus] = []
-        team = []
+        team: list[TitanStatus] = []
         # нужно отсортировать команду по позициям,
         # чтобы корректно сопоставить сканируемое окно с титаном
         for titan_name in battle_state.current_team:
@@ -51,6 +56,8 @@ class HealthScanerService:
             result.append(
                 TitanStatus(name=titan.name, health=health_prc, energy=energy_prc)
             )
+        for status in result:
+            logger.info(f"{status}")
         return result
 
     def __by_prc(

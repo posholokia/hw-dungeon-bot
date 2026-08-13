@@ -1,7 +1,13 @@
+from logging import Logger
+
+from structlog import getLogger
+
 from configs.settings import SelectionConfig
 from interfaces.output import IMouseClick
 from models.dto import ClickArea, Titan
 from services.titan_catalog import TitanCatalog
+
+logger: Logger = getLogger(__name__)
 
 
 class TeamSelectService:
@@ -18,6 +24,7 @@ class TeamSelectService:
         self._selection_cfg = selection_cfg
 
     def select_team(self, current_team: set[str], expected_team: set[str]) -> None:
+        logger.info(f"Смена команды, выбор: {expected_team}")
         current_titans, expected_titans = self._load_titans(current_team, expected_team)
 
         # убираем лишних титанов

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from threading import Event
-
 from structlog import getLogger
 
-from domain.types import ElementPosition, PreviewSeconds, RoomElement, RoomPosition
+from domain.types import ElementPosition, RoomElement, RoomPosition
 from interfaces.output import IMouseClick
 from models.dto import ClickArea, State
 from services.battle.dto import BattleState
@@ -20,23 +18,19 @@ class SelectRoomService:
         self,
         click_areas: dict[RoomPosition, ClickArea],
         click_service: IMouseClick,
-        preview_seconds: PreviewSeconds,
     ) -> None:
         self._click_areas = click_areas
         self._click_service = click_service
-        self._preview_seconds = preview_seconds
 
-    def click_room(self, position: RoomPosition, stop_event: Event) -> None:
+    def click_room(self, position: RoomPosition) -> None:
         area = self._click_areas[position]
         self._click_service.mouse_click((area.x, area.y), area.width, area.height)
-        stop_event.wait(self._preview_seconds)
 
     def select_room_element(
         self,
         state: State,
         battle_state: BattleState,
         elements: dict[RoomElement, ElementPosition],
-        stop_event: Event,
     ) -> None:
         if battle_state.need_healing and "common" in elements:
             area = self._click_areas[elements["common"]]
@@ -49,6 +43,4 @@ class SelectRoomService:
                         (area.x, area.y), area.width, area.height
                     )
                     state.room_element = element
-                    break
-
-        stop_event.wait(self._preview_seconds)
+                    return

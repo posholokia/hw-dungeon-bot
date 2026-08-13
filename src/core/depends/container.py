@@ -97,7 +97,8 @@ class DiContainer:
 
         def build_designation_click(context: ActivationScope) -> DesignationClick:
             marker = lambda: context.get(ClickMarker)
-            return DesignationClick(marker)
+            preview = context.get(PreviewSeconds)
+            return DesignationClick(marker=marker, preview_seconds=preview)
 
         self._container.register_factory(
             build_designation_click, IMouseClick, life_style=ServiceLifeStyle.TRANSIENT
@@ -131,12 +132,10 @@ class DiContainer:
 
         def build_replay_service(context: ActivationScope) -> ReplayService:
             timeout = context.get(Timeout)
-            preview = context.get(PreviewSeconds)
             clicker = context.get(IMouseClick)
             return ReplayService(
                 replay_conditions=self._config.battle.replay.replay_conditions,
                 timeout=timeout,
-                preview_seconds=preview,
                 clicker=clicker,
                 replay_buttons=self._config.battle.replay.buttons,
             )
@@ -162,11 +161,9 @@ class DiContainer:
         def build_select_room_service(context: ActivationScope) -> SelectRoomService:
             click_areas = self._config.room.click_area
             click_service = context.get(IMouseClick)
-            preview_seconds = context.get(PreviewSeconds)
             return SelectRoomService(
                 click_areas=click_areas,
                 click_service=click_service,
-                preview_seconds=preview_seconds,
             )
 
         def build_titan_catalog_service() -> TitanCatalog:
@@ -199,13 +196,11 @@ class DiContainer:
 
         def build_floor_transit(context: ActivationScope) -> FloorTransitService:
             timeout = context.get(Timeout)
-            preview = context.get(PreviewSeconds)
             clicker = context.get(IMouseClick)
             return FloorTransitService(
                 buttons_cfg=self._config.floor_transit,
                 clicker=clicker,
                 timeout=timeout,
-                preview_seconds=preview,
             )
 
         self._container.register_factory(
@@ -251,10 +246,8 @@ class DiContainer:
 
         def build_battle_selector(context: ActivationScope) -> BattleSelectorService:
             clicker = context.get(IMouseClick)
-            preview = context.get(PreviewSeconds)
             return BattleSelectorService(
                 clicker=clicker,
-                preview_seconds=preview,
                 autobattle_button=self._config.battle.autobattle.click_area,
             )
 

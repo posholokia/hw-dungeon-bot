@@ -5,7 +5,7 @@ from threading import Event
 from structlog import getLogger
 
 from configs.settings import ButtonConfig, ReplayButtonsConfig
-from domain.types import PreviewSeconds, Timeout
+from domain.types import Timeout
 from exceptions import StopApplicationError
 from interfaces.output import IMouseClick
 from services.battle.dto import TitanStatus
@@ -19,13 +19,11 @@ class ReplayService:
     def __init__(
         self,
         timeout: Timeout,
-        preview_seconds: PreviewSeconds,
         replay_conditions: dict[str, list[str]],
         replay_buttons: ReplayButtonsConfig,
         clicker: IMouseClick,
     ) -> None:
         self._timeout = timeout
-        self._preview = preview_seconds
         self._replay_conditions = replay_conditions
         self._replay_buttons = replay_buttons
         self._clicker = clicker
@@ -65,9 +63,10 @@ class ReplayService:
             if match_fingerprint(fingerprint, cfg.fingerprint):
                 area = cfg.click_area
                 self._clicker.mouse_click(area.c, area.width, area.height)
-                stop_event.wait(self._preview)
+                return
 
-            stop_event.wait(0.005)
+            if stop_event.wait(0.005):
+                return
 
         raise StopApplicationError("Не найдено кнопки")
 
