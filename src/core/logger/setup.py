@@ -7,7 +7,7 @@ from core.logger.processors.overlay import OverlayProcessor
 
 def setup_logging(
     overlay: OverlayProcessor,
-    level: int = logging.INFO,
+    level: int = logging.DEBUG,
 ) -> None:
     structlog.configure(
         processors=[

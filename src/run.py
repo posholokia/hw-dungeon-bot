@@ -67,6 +67,8 @@ class BotOrchestration:
             except RetryApplicationError as e:
                 battle_state.clear()
                 logger.info(e.__str__())
+                logger.info("Пауза перед следующим циклом...")
+                stop_event.wait(60)
                 continue
             except Exception as e:
                 battle_state.clear()
