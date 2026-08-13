@@ -31,4 +31,3 @@ class MouseController(IMouseClick):
 
     def hide_mouse(self) -> None:
         self._mouse.position = (0, 0)
-        self._mouse.click(Button.left)
