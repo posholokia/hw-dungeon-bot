@@ -44,10 +44,6 @@ class BattleState:
             raise ValueError("Элемент комнтаы еще не проскнирован")
         return self.__room_element
 
-    @property
-    def can_change_team(self) -> bool:
-        return self.__room_element == "common"
-
     def _get_element_teams(self) -> list[list[str]]:
         teams = deepcopy(self.teams)
         assert self.__room_element

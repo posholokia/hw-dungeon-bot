@@ -4,6 +4,7 @@ from threading import Event
 
 from structlog import getLogger
 
+from core.randomizer import randomizer
 from domain.types import CoordinateList, FingerPrint, Timeout
 from exceptions import ApplicationError, StopApplicationError
 from interfaces.output import IMouseClick
@@ -37,7 +38,7 @@ class BattleScannerService:
         self._clicker = clicker
 
     def scan_team(self) -> set[str]:
-        time.sleep(1)
+        time.sleep(randomizer.uniform(2.13, 2.86))
         current_team: set[str] = set()
         catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
         self._clicker.hide_mouse()
