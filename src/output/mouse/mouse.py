@@ -1,10 +1,10 @@
-import random
 import time
 from logging import Logger
 
 from pynput.mouse import Button, Controller  # type: ignore [import-untyped]
 from structlog import getLogger
 
+from core.randomizer import randomizer
 from domain.types import Coordinate, no_value
 from interfaces.output import IMouseClick
 
@@ -19,12 +19,12 @@ class MouseController(IMouseClick):
         self, c: Coordinate, width: int = no_value, height: int = no_value
     ) -> None:
         if width and height:
-            x = random.randint(c[0], c[0] + width - 1)
-            y = random.randint(c[1], c[1] + height - 1)
+            x = randomizer.randint(c[0], c[0] + width - 1)
+            y = randomizer.randint(c[1], c[1] + height - 1)
         else:
             x = c[0]
             y = c[1]
-        time.sleep(random.uniform(0.256, 0.434))
+        time.sleep(randomizer.uniform(0.256, 0.434))
         self._mouse.position = (x, y)
         self._mouse.click(Button.left)
         logger.debug(f"Клик мышью по координатам: x={x}, y={y}")

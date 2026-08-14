@@ -243,11 +243,13 @@ class DiContainer:
             catalog = context.get(TitanCatalog)
             clicker = context.get(IMouseClick)
             team_areas = [cfg.click_area for cfg in self._config.battle.current_team]
+            timeout = context.get(Timeout)
             return TeamSelectService(
                 titan_catalog=catalog,
                 clicker=clicker,
                 selected_click_areas=team_areas,
                 selection_cfg=self._config.battle.selection,
+                timeout=timeout,
             )
 
         self._container.register_factory(

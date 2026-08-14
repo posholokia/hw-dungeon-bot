@@ -1,11 +1,17 @@
+import time
 from logging import Logger
 
 from structlog import getLogger
 
 from configs.settings import SelectionConfig
+from core.randomizer import randomizer
+from domain.types import RoomElement, Timeout
+from exceptions import ApplicationError
 from interfaces.output import IMouseClick
 from models.dto import ClickArea, Titan
+from services.fingerprint_match import match_fingerprint
 from services.titan_catalog import TitanCatalog
+from vision.screen import take_print
 
 logger: Logger = getLogger(__name__)
 
@@ -17,20 +23,28 @@ class TeamSelectService:
         selected_click_areas: list[ClickArea],
         selection_cfg: SelectionConfig,
         clicker: IMouseClick,
+        timeout: Timeout,
     ) -> None:
         self._catalog = titan_catalog
         self._selected_click_areas = selected_click_areas
         self._clicker = clicker
         self._selection_cfg = selection_cfg
+        self._timeout = timeout
 
-    def select_team(self, current_team: set[str], expected_team: set[str]) -> None:
+    def select_team(
+        self,
+        current_team: set[str],
+        expected_team: set[str],
+        element: RoomElement,
+    ) -> None:
         logger.debug(
             f"Смена команды. Текущая команда: {current_team},"
             f"ожидаемая команда: {expected_team}"
         )
         current_titans, expected_titans = self._load_titans(current_team, expected_team)
+        missing = set(expected_titans) - set(current_titans)
         logger.debug(
-            f"Требуется убрать: {current_team - expected_team}, добавить: {expected_team - current_team}"
+            f"Требуется убрать: {current_team - expected_team}, добавить: {missing}"
         )
         # убираем лишних титанов
         click_order = self._click_position_order(current_titans, expected_titans)
@@ -39,10 +53,8 @@ class TeamSelectService:
             self._clicker.mouse_click(area.c, area.width, area.height)
 
         # выбираем недостающих титанов
-        missing = set(expected_titans) - set(current_titans)
-
         for titan in missing:
-            self._select_titan(titan)
+            self._select_titan(titan, element)
 
     def _load_titans(
         self, current_team: set[str], expected_team: set[str]
@@ -62,40 +74,68 @@ class TeamSelectService:
     def _click_position_order(
         self, current_titans: list[Titan], expected_titans: list[Titan]
     ) -> list[int]:
-        current_positions = {t.position for t in current_titans}
-        expected_positions = {t.position for t in expected_titans}
-        all_positions = list(current_positions.union(expected_positions))
-        all_positions.sort()
+        """
+        Собирает очередь из позиций на экране, по которым нужно нажать чтобы
+        убрать лишних титанов.
 
+        Например, текущая команда: ["Молох", "Вулкан", "Араджи", "Игнис", "Ашерона"].
+        Нужно сделать: ["Араджи", "Игнис", "Ашерона"]
+
+        Нужно нажать на Молоха и Вулкана, чтобы их убрать.
+        Молох самый первый (0 индекс), после нажатия все титаны сместятся
+        и их индексы тоже. На 0 индексе будет Вулкан, соответственно второй
+        клик будет тоже по 0 позиции. Т.е метод вернет [0, 0].
+
+        Args:
+            current_titans: Список текущей команды
+            expected_titans: Список ожидаемой команды.
+
+        Returns:
+            Список индексов
+        """
+        current_titans.sort(key=lambda x: x.position)
+        excess = set(current_titans) - set(expected_titans)
         click_order = []
-        c = 0
+        shift = 0
 
-        for pos in all_positions:
-            if pos in expected_positions and pos not in current_positions:
-                continue
-            elif pos in expected_positions and pos in current_positions:
-                c += 1
-                continue
-            elif pos not in expected_positions and pos in current_positions:
-                click_order.append(c)
-                continue
+        for i, titan in enumerate(current_titans):
+            if titan in excess:
+                click_order.append(i - shift)
+                shift += 1
 
         return click_order
 
-    def _select_titan(self, titan: Titan) -> None:
+    def _select_titan(self, titan: Titan, element: RoomElement) -> None:
         """
         Выбирает титана в команду.
         Кнопка "Фильтры" -> фильр по элементу -> фильтр по роли -> кнопка "Фильтры" -> клик по титану.
         """
+        if element == "common":
+            self.__set_filter(titan)
+
+        time.sleep(randomizer.uniform(0.45, 0.96))
+
+        for pos, cfg in self._selection_cfg.check_positions.items():
+            self._clicker.hide_mouse()
+            fingerprint = take_print(cfg.coordinates)
+            logger.debug(f"Чек позиции {pos}, отпечаток: {fingerprint}")
+
+            if match_fingerprint(fingerprint, titan.fingerprint):
+                logger.info(f"Титан {titan.name} обнаружен на позиции {pos}")
+                area = cfg.click_area
+                self._clicker.mouse_click(area.c, area.width, area.height)
+                return
+
+        logger.info(f"Не удалось найти титана: name={titan.name}")
+        raise ApplicationError()
+
+    def __set_filter(self, titan: Titan) -> None:
         filter_area = self._selection_cfg.filter_button
         element_area = self._selection_cfg.elements[titan.element]
         role_area = self._selection_cfg.roles[titan.role]
-        titan_area = self._selection_cfg.titan
-
         self._clicker.mouse_click(filter_area.c, filter_area.width, filter_area.height)
         self._clicker.mouse_click(
             element_area.c, element_area.width, element_area.height
         )
         self._clicker.mouse_click(role_area.c, role_area.width, role_area.height)
         self._clicker.mouse_click(filter_area.c, filter_area.width, filter_area.height)
-        self._clicker.mouse_click(titan_area.c, titan_area.width, titan_area.height)

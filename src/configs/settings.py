@@ -59,17 +59,11 @@ class IconPositionConfig(BaseSettings):
     coordinates: CoordinateList
 
 
-class BattleSelectPositions(BaseSettings):
-    common: CoordinateList
-    fire: dict[str, IconPositionConfig]
-
-
 class SelectionConfig(BaseSettings):
     filter_button: ClickArea
     elements: dict[TitanElement, ClickArea]
     roles: dict[TitanRole, ClickArea]
-    titan: ClickArea
-    check_positions: BattleSelectPositions
+    check_positions: dict[str, IconPositionConfig]
 
 
 class AutobattleConfig(BaseSettings):

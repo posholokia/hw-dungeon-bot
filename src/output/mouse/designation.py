@@ -1,9 +1,9 @@
-import random
 import time
 from collections.abc import Callable
 
 from structlog import get_logger
 
+from core.randomizer import randomizer
 from domain.types import Coordinate, PreviewSeconds, no_value
 from widgets.click_marker import ClickMarker
 
@@ -31,8 +31,8 @@ class DesignationClick:
         """
         try:
             if width and height:
-                x = random.randint(c[0], c[0] + width - 1)
-                y = random.randint(c[1], c[1] + height - 1)
+                x = randomizer.randint(c[0], c[0] + width - 1)
+                y = randomizer.randint(c[1], c[1] + height - 1)
             else:
                 x = c[0]
                 y = c[1]

@@ -1,8 +1,8 @@
-import random
 from threading import Event
 
 from structlog import getLogger
 
+from core.randomizer import randomizer
 from exceptions import ApplicationError, StopApplicationError
 from services.battle.battle.dead_scaner import DeadScanService
 from services.battle.battle.healing import HealthObserveService
@@ -74,7 +74,7 @@ class BattleUseCase:
             return battle_state, True
 
         # ожидаем, так как анимация перекрывает полоски здоровья/энергии
-        if stop_event.wait(random.uniform(2.3, 4.2)):
+        if stop_event.wait(randomizer.uniform(2.3, 4.2)):
             raise StopApplicationError()
 
         health_list = self._health_scaner.scan_health(battle_state)
@@ -97,7 +97,9 @@ class BattleUseCase:
         tries = 0
 
         while current_team != expected_team:
-            self._select_service.select_team(current_team, expected_team)
+            self._select_service.select_team(
+                current_team, expected_team, battle_state.room_element
+            )
             current_team = self._scaner.scan_team()
             tries += 1
 
