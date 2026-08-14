@@ -24,9 +24,14 @@ class TeamSelectService:
         self._selection_cfg = selection_cfg
 
     def select_team(self, current_team: set[str], expected_team: set[str]) -> None:
-        logger.info(f"Смена команды, выбор: {expected_team}")
+        logger.debug(
+            f"Смена команды. Текущая команда: {current_team},"
+            f"ожидаемая команда: {expected_team}"
+        )
         current_titans, expected_titans = self._load_titans(current_team, expected_team)
-
+        logger.debug(
+            f"Требуется убрать: {current_team - expected_team}, добавить: {expected_team - current_team}"
+        )
         # убираем лишних титанов
         click_order = self._click_position_order(current_titans, expected_titans)
         for click_area_idx in click_order:
@@ -59,7 +64,7 @@ class TeamSelectService:
     ) -> list[int]:
         current_positions = {t.position for t in current_titans}
         expected_positions = {t.position for t in expected_titans}
-        all_positions = list(current_positions) + list(expected_positions)
+        all_positions = list(current_positions.union(expected_positions))
         all_positions.sort()
 
         click_order = []

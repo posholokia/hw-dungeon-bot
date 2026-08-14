@@ -54,11 +54,22 @@ class HealingRulesConfig(BaseSettings):
     heal_below: int  # проценты
 
 
+class IconPositionConfig(BaseSettings):
+    click_area: ClickArea
+    coordinates: CoordinateList
+
+
+class BattleSelectPositions(BaseSettings):
+    common: CoordinateList
+    fire: dict[str, IconPositionConfig]
+
+
 class SelectionConfig(BaseSettings):
     filter_button: ClickArea
     elements: dict[TitanElement, ClickArea]
     roles: dict[TitanRole, ClickArea]
     titan: ClickArea
+    check_positions: BattleSelectPositions
 
 
 class AutobattleConfig(BaseSettings):
