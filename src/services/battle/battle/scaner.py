@@ -52,7 +52,9 @@ class BattleScannerService:
         matched_pos: list[int] = []
         for name, titan in catalog.items():
             for pos, fingerprint in fingerprints_by_pos.items():
-                matched = match_fingerprint(fingerprint, titan.fingerprint)
+                matched = match_fingerprint(
+                    fingerprint, titan.fingerprint, tolerance=17
+                )
 
                 if matched:
                     matched_pos.append(pos)

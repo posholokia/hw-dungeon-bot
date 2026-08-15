@@ -120,7 +120,7 @@ class TeamSelectService:
             fingerprint = take_print(cfg.coordinates)
             logger.debug(f"Чек позиции {pos}, отпечаток: {fingerprint}")
 
-            if match_fingerprint(fingerprint, titan.fingerprint):
+            if match_fingerprint(fingerprint, titan.fingerprint, tolerance=17):
                 logger.info(f"Титан {titan.name} обнаружен на позиции {pos}")
                 area = cfg.click_area
                 self._clicker.mouse_click(area.c, area.width, area.height)

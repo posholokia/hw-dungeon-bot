@@ -17,6 +17,11 @@ def match_fingerprint(
     differ by at most ``tolerance``. True matches on reference shots are
     within ~2; unrelated UI is typically 150+.
     """
+    if tolerance > 17:
+        raise ValueError(
+            f"Слишком высокое значение {tolerance=}. "
+            "При значении выше 17 появляются коллизии"
+        )
     if len(scanned) != len(fingerprint):
         return False
 
