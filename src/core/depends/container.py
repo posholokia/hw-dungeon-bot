@@ -16,6 +16,7 @@ from services.battle.battle.scaner import BattleScannerService
 from services.battle.battle.selector import BattleSelectorService
 from services.battle.battle.team_select import TeamSelectService
 from services.floor_transit import FloorTransitService
+from services.return_to_game import ReturnGameService
 from services.select_room.scaner import RoomFinderService
 from services.select_room.selector import SelectRoomService
 from services.titan_catalog import TitanCatalog
@@ -74,11 +75,14 @@ class DiContainer:
                 teams=self._config.battle.teams,
                 healing_team=self._config.battle.healing_team,
             )
+            return_service = context.get(ReturnGameService)
+
             return BotOrchestration(
                 select_room_use_case=select_uc,
                 battle_use_case=battle_uc,
                 floor_service=floor_service,
                 cfg=battle_state,
+                return_service=return_service,
             )
 
         self._container.register_factory(
@@ -268,6 +272,15 @@ class DiContainer:
             BattleSelectorService,
             life_style=ServiceLifeStyle.TRANSIENT,
         )
+
+        def build_return_game(context: ActivationScope) -> ReturnGameService:
+            clicker = context.get(IMouseClick)
+            return ReturnGameService(
+                cfg=self._config.drop,
+                clicker=clicker,
+            )
+
+        self._container.add_singleton_by_factory(build_return_game, ReturnGameService)
 
     def __init_types(self) -> None:
         def build_timeout() -> Timeout:

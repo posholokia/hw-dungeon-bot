@@ -13,15 +13,11 @@ class HealthObserveService:
     def observe(
         self, health_list: list[TitanStatus], battle_state: BattleState
     ) -> None:
-        healing_list = set()
         for titan in health_list:
             if titan.name not in self._healing_rules.titans:
                 continue
-
-            if titan.health >= self._healing_rules.heal_below:
-                continue
-
-            healing_list.add(titan.name)
-
-        battle_state.need_healing = healing_list
-        logger.info(f"Требуется лечение: {healing_list}")
+            elif titan.health >= self._healing_rules.heal_below:
+                battle_state.remove_from_heal_list(titan.name)
+            else:
+                battle_state.add_to_leal_list(titan.name)
+                logger.info(f"Требуется лечение: {titan.name}")

@@ -9,6 +9,7 @@ from exceptions import RetryApplicationError, StopApplicationError
 from models.dto import State
 from services.battle.dto import BattleState
 from services.floor_transit import FloorTransitService
+from services.return_to_game import ReturnGameService
 from use_cases.battle import BattleUseCase
 from use_cases.select_room import SelectRoomUseCase
 
@@ -28,11 +29,13 @@ class BotOrchestration:
         battle_use_case: BattleUseCase,
         floor_service: FloorTransitService,
         cfg: BattleStateCfg,
+        return_service: ReturnGameService,
     ) -> None:
         self._select_room = select_room_use_case
         self._battle = battle_use_case
         self._cfg = cfg
         self._floor_service = floor_service
+        self._return_service = return_service
 
     def run(self, stop_event: Event) -> None:
         state = State()
@@ -69,9 +72,14 @@ class BotOrchestration:
             except RetryApplicationError as e:
                 battle_state.clear()
                 logger.info(e.__str__())
-                logger.info("Пауза перед следующим циклом...")
-                stop_event.wait(60)
-                continue
+                logger.debug("Проверка игры на вылет")
+                game_dropped = self._return_service.execute(stop_event)
+
+                if game_dropped:
+                    continue
+                else:
+                    logger.warning("Ошибка приложения, завершение работы...")
+                    return
             except Exception as e:
                 battle_state.clear()
                 logger.exception(e.__str__())

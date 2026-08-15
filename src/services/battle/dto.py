@@ -16,7 +16,18 @@ class BattleState:
     current_team: list[str] = field(default_factory=list, init=False)
     __room_element: RoomElement | None = field(default=None, init=False)
     __team_index: int = field(default=0, init=False)
-    need_healing: set[str] = field(default_factory=set, init=False)
+    __need_healing: set[str] = field(default_factory=set, init=False)
+
+    @property
+    def need_healing(self) -> set[str]:
+        return self.__need_healing.copy()
+
+    def add_to_leal_list(self, name: str) -> None:
+        self.__need_healing.add(name)
+
+    def remove_from_heal_list(self, name: str) -> None:
+        if name in self.__need_healing:
+            self.__need_healing.remove(name)
 
     def start(self, element: RoomElement) -> None:
         self.__room_element = element

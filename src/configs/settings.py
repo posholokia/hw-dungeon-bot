@@ -145,11 +145,18 @@ class FloorTransitConfig(BaseSettings):
     ok: ButtonConfig
 
 
+class DropGameConfig(BaseSettings):
+    screen: ButtonConfig
+    guild: ButtonConfig
+    dungeon: ClickArea
+
+
 class AppSettings(BaseSettings):
     room: RoomConfigs = Field(default_factory=RoomConfigs)
     selection: SelectionConfigs = Field(default_factory=SelectionConfigs)
     battle: BattleConfigs = Field(default_factory=BattleConfigs)
     floor_transit: FloorTransitConfig = Field(default_factory=FloorTransitConfig)
+    drop: DropGameConfig = Field(default_factory=DropGameConfig)
 
     @classmethod
     def settings_customise_sources(

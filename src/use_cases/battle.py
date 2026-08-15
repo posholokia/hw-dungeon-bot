@@ -81,6 +81,7 @@ class BattleUseCase:
 
         if not self.__dead_sentinel(health_list):
             logger.info("Есть титаны с 0 ХП, переигровка")
+            self._replay_service.replay(lose=False, stop_event=stop_event)
             return battle_state, True
 
         need_replay = self._replay_service.check_replay_condition(health_list)
