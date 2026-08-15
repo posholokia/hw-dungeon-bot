@@ -42,20 +42,35 @@ class BattleScannerService:
         current_team: set[str] = set()
         catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
         self._clicker.hide_mouse()
+        fingerprints_by_pos: dict[int, FingerPrint] = {}
 
-        for coords in self._analyze_team_coords:
+        for i, coords in enumerate(self._analyze_team_coords, start=1):
             fingerprint = take_print(coords)
+            fingerprints_by_pos[i] = fingerprint
 
-            for name, titan in catalog.items():
+        logger.debug(f"Отпечатки команды: {fingerprints_by_pos}")
+
+        for name, titan in catalog.items():
+            for pos, fingerprint in fingerprints_by_pos.items():
                 matched = match_fingerprint(fingerprint, titan.fingerprint)
 
                 if matched:
                     if titan.name == "<EMPTY>":
+                        logger.info(f"Позиция {pos} пустая")
                         continue
 
                     current_team.add(name)
-                    logger.info(f"Обнаружен титан: {name}, команда: {current_team}")
+                    logger.info(
+                        f"Обнаружен титан: Позиция {pos}, {name}, команда: {current_team}"
+                    )
+                    del fingerprints_by_pos[pos]
+                    del catalog[name]
                     break
+                else:
+                    logger.error(
+                        f"Не удалось сматчить титана в позиции {pos}, отпечаток: {fingerprint}"
+                    )
+                    raise ApplicationError()
 
         return current_team
 
