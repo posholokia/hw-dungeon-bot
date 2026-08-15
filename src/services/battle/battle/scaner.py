@@ -45,16 +45,17 @@ class BattleScannerService:
         fingerprints_by_pos: dict[int, FingerPrint] = {}
 
         for i, coords in enumerate(self._analyze_team_coords, start=1):
-            fingerprint = take_print(coords)
-            fingerprints_by_pos[i] = fingerprint
+            fingerprints_by_pos[i] = take_print(coords)
 
         logger.debug(f"Отпечатки команды: {fingerprints_by_pos}")
 
+        matched_pos: list[int] = []
         for name, titan in catalog.items():
             for pos, fingerprint in fingerprints_by_pos.items():
                 matched = match_fingerprint(fingerprint, titan.fingerprint)
 
                 if matched:
+                    matched_pos.append(pos)
                     if titan.name == "<EMPTY>":
                         logger.info(f"Позиция {pos} пустая")
                         continue
@@ -64,14 +65,12 @@ class BattleScannerService:
                         f"Обнаружен титан: Позиция {pos}, {name}, команда: {current_team}"
                     )
                     del fingerprints_by_pos[pos]
-                    del catalog[name]
                     break
-                else:
-                    logger.error(
-                        f"Не удалось сматчить титана в позиции {pos}, отпечаток: {fingerprint}"
-                    )
-                    raise ApplicationError()
 
+        if len(matched_pos) != 5:
+            raise ApplicationError(
+                f"Не удалось сматчить все позиции. Сматчены позиции: {matched_pos}"
+            )
         return current_team
 
     def scan_autobattle(self, stop_event: Event) -> None:
