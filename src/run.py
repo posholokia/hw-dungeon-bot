@@ -59,7 +59,7 @@ class BotOrchestration:
                 self._floor_service.transit(state, stop_event)
                 self._win(battle_state, state)
 
-                if state.levels_completed >= 100:
+                if state.levels_completed >= 1000:
                     logger.info("Лимит уровней пройден")
                     return
 
