@@ -11,7 +11,7 @@ from services.battle.battle.replay import ReplayService
 from services.battle.battle.scaner import BattleScannerService
 from services.battle.battle.selector import BattleSelectorService
 from services.battle.battle.team_select import TeamSelectService
-from services.battle.dto import BattleState
+from services.battle.dto import BattleState, TitanStatus
 
 logger = getLogger(__name__)
 
@@ -78,6 +78,11 @@ class BattleUseCase:
             raise StopApplicationError()
 
         health_list = self._health_scaner.scan_health(battle_state)
+
+        if not self.__dead_sentinel(health_list):
+            logger.info("Есть титаны с 0 ХП, переигровка")
+            return battle_state, True
+
         need_replay = self._replay_service.check_replay_condition(health_list)
 
         if need_replay:
@@ -105,3 +110,9 @@ class BattleUseCase:
 
             if stop_event.is_set():
                 raise ApplicationError()
+
+    def __dead_sentinel(self, health_list: list[TitanStatus]) -> bool:
+        """
+        Защита, на случай если проверка мертвых не отработала.
+        """
+        return all(status.health for status in health_list)
