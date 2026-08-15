@@ -38,7 +38,7 @@ class BattleScannerService:
         self._clicker = clicker
 
     def scan_team(self) -> set[str]:
-        time.sleep(randomizer.uniform(2.13, 2.86))
+        time.sleep(randomizer.uniform(2.33, 3.06))
         current_team: set[str] = set()
         catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
         self._clicker.hide_mouse()
