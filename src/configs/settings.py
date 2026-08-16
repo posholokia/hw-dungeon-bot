@@ -66,12 +66,6 @@ class SelectionConfig(BaseSettings):
     check_positions: dict[str, IconPositionConfig]
 
 
-class AutobattleConfig(BaseSettings):
-    coordinates: CoordinateList
-    click_area: ClickArea
-    fingerprint: FingerPrint
-
-
 class BattleResultConfig(BaseSettings):
     coordinates: CoordinateList
     fingerprints: dict[str, FingerPrint]
@@ -125,7 +119,7 @@ class BattleConfigs(BaseSettings):
     healing_team: list[str]  # имена титанов
     healing_rules: HealingRulesConfig
     selection: SelectionConfig
-    autobattle: AutobattleConfig
+    autobattle: ButtonConfig
     battle_result: BattleResultConfig
     titan_status: TitanStatusConfig
     replay: ReplayConfig
@@ -148,7 +142,7 @@ class FloorTransitConfig(BaseSettings):
 class DropGameConfig(BaseSettings):
     screen: ButtonConfig
     guild: ButtonConfig
-    dungeon: ClickArea
+    dungeon: ButtonConfig
 
 
 class AppSettings(BaseSettings):

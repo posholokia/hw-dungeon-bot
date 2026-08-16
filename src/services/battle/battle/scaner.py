@@ -7,10 +7,11 @@ from structlog import getLogger
 from core.randomizer import randomizer
 from domain.types import CoordinateList, FingerPrint, Timeout
 from exceptions import ApplicationError, StopApplicationError
-from interfaces.output import IMouseClick
+from interfaces.cfg import IScreenButton
 from models.dto import Titan
 from services.fingerprint_match import match_fingerprint
 from services.titan_catalog import TitanCatalog
+from services.wait_clicker import WaitClickCheckService
 from vision.screen import take_print
 
 logger = getLogger(__name__)
@@ -22,26 +23,23 @@ class BattleScannerService:
         titan_catalog: TitanCatalog,
         analyze_team_coords: list[CoordinateList],
         timeout: Timeout,
-        autobattle_coordinates: CoordinateList,
-        autobattle_fingerprint: FingerPrint,
+        autobattle_cfg: IScreenButton,
         result_coordinates: CoordinateList,
         result_fingerprints: dict[str, FingerPrint],
-        clicker: IMouseClick,
+        waiter: WaitClickCheckService,
     ) -> None:
         self._analyze_team_coords = analyze_team_coords
         self._titan_catalog = titan_catalog
-        self._autobattle_coordinates = autobattle_coordinates
-        self._autobattle_fingerprint = autobattle_fingerprint
+        self._autobattle_cfg = autobattle_cfg
         self._result_coordinates = result_coordinates
         self._result_fingerprints = result_fingerprints
         self._timeout = timeout
-        self._clicker = clicker
+        self._waiter = waiter
 
     def scan_team(self) -> set[str]:
         time.sleep(randomizer.uniform(2.33, 3.06))
         current_team: set[str] = set()
         catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
-        self._clicker.hide_mouse()
         fingerprints_by_pos: dict[int, FingerPrint] = {}
 
         for i, coords in enumerate(self._analyze_team_coords, start=1):
@@ -76,23 +74,14 @@ class BattleScannerService:
         return current_team
 
     def scan_autobattle(self, stop_event: Event) -> None:
-        start = time.perf_counter()
         logger.info("Ожидание кнопки автобоя")
-        self._clicker.hide_mouse()
-
-        while time.perf_counter() - start < self._timeout:
-            if stop_event.is_set():
-                return
-
-            scanned = take_print(self._autobattle_coordinates)
-
-            if match_fingerprint(scanned, self._autobattle_fingerprint):
-                return
-
-            if stop_event.wait(timeout=0.005):
-                return
-
-        raise ApplicationError("Не найдена кнопка автобоя")
+        finded = self._waiter.wait(
+            coordinates=self._autobattle_cfg.coordinates,
+            fingerprint=self._autobattle_cfg.fingerprint,
+            stop_event=stop_event,
+        )
+        if not finded:
+            raise ApplicationError("Не найдена кнопка автобоя")
 
     def scan_win_loose(self, stop_event: Event) -> bool:
         """
@@ -101,7 +90,6 @@ class BattleScannerService:
         """
         start = time.perf_counter()
         logger.info("Waiting for win/lose screen")
-        self._clicker.hide_mouse()
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():

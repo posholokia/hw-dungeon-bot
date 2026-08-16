@@ -20,6 +20,7 @@ from services.return_to_game import ReturnGameService
 from services.select_room.scaner import RoomFinderService
 from services.select_room.selector import SelectRoomService
 from services.titan_catalog import TitanCatalog
+from services.wait_clicker import WaitClickCheckService
 from use_cases.battle import BattleUseCase
 from use_cases.select_room import SelectRoomUseCase
 from widgets.click_marker import ClickMarker
@@ -224,17 +225,16 @@ class DiContainer:
         def build_battle_scaner(context: ActivationScope) -> BattleScannerService:
             catalog = context.get(TitanCatalog)
             timeout = context.get(Timeout)
-            clicker = context.get(IMouseClick)
+            waiter = context.get(WaitClickCheckService)
             team_coords = [cfg.coordinates for cfg in self._config.battle.current_team]
             return BattleScannerService(
                 titan_catalog=catalog,
                 timeout=timeout,
                 analyze_team_coords=team_coords,
-                autobattle_coordinates=self._config.battle.autobattle.coordinates,
-                autobattle_fingerprint=self._config.battle.autobattle.fingerprint,
+                autobattle_cfg=self._config.battle.autobattle,
                 result_coordinates=self._config.battle.battle_result.coordinates,
                 result_fingerprints=self._config.battle.battle_result.fingerprints,
-                clicker=clicker,
+                waiter=waiter,
             )
 
         self._container.register_factory(
@@ -274,13 +274,14 @@ class DiContainer:
         )
 
         def build_return_game(context: ActivationScope) -> ReturnGameService:
-            clicker = context.get(IMouseClick)
+            clicker = context.get(WaitClickCheckService)
             return ReturnGameService(
                 cfg=self._config.drop,
                 clicker=clicker,
             )
 
         self._container.add_singleton_by_factory(build_return_game, ReturnGameService)
+        self._container.register(WaitClickCheckService, WaitClickCheckService)
 
     def __init_types(self) -> None:
         def build_timeout() -> Timeout:
