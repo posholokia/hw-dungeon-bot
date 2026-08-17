@@ -8,7 +8,6 @@ from domain.types import PreviewSeconds, Timeout
 from interfaces.output import IMouseClick
 from output.mouse.mouse import MouseController
 from run import BattleStateCfg, BotOrchestration
-from services.battle.battle.dead_scaner import DeadScanService
 from services.battle.battle.healing import HealthObserveService
 from services.battle.battle.health_scaner import HealthScanerService
 from services.battle.battle.replay import ReplayService
@@ -109,19 +108,6 @@ class DiContainer:
         #     build_designation_click, IMouseClick, life_style=ServiceLifeStyle.TRANSIENT
         # )
         self._container.register(IMouseClick, MouseController)
-
-        def build_dead_scaner(context: ActivationScope) -> DeadScanService:
-            clicker = context.get(IMouseClick)
-            return DeadScanService(
-                windows=self._config.battle.titan_status.check.windows,
-                offsets=self._config.battle.titan_status.dead_status.offsets,
-                fingerprint=self._config.battle.titan_status.dead_status.fingerprint,
-                clicker=clicker,
-            )
-
-        self._container.register_factory(
-            build_dead_scaner, DeadScanService, life_style=ServiceLifeStyle.TRANSIENT
-        )
 
         def build_health_scaner(context: ActivationScope) -> HealthScanerService:
             catalog = context.get(TitanCatalog)

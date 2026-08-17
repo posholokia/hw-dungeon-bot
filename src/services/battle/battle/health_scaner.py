@@ -41,7 +41,6 @@ class HealthScanerService:
 
     def scan_health(self, battle_state: BattleState) -> list[TitanStatus]:
         logger.info("Анализ здоровья/энергии после боя")
-        self._clicker.hide_mouse()
         team_len = len(battle_state.current_team)
         windows = deepcopy(self._windows[team_len])
         result: list[TitanStatus] = []

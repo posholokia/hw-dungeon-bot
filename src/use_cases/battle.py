@@ -4,7 +4,6 @@ from structlog import getLogger
 
 from core.randomizer import randomizer
 from exceptions import ApplicationError, StopApplicationError
-from services.battle.battle.dead_scaner import DeadScanService
 from services.battle.battle.healing import HealthObserveService
 from services.battle.battle.health_scaner import HealthScanerService
 from services.battle.battle.replay import ReplayService
@@ -27,7 +26,6 @@ class BattleUseCase:
         scaner: BattleScannerService,
         select_service: TeamSelectService,
         selector: BattleSelectorService,
-        dead_scaner: DeadScanService,
         health_scaner: HealthScanerService,
         replay_service: ReplayService,
         health_observe: HealthObserveService,
@@ -35,7 +33,6 @@ class BattleUseCase:
         self._scaner = scaner
         self._select_service = select_service
         self._selector = selector
-        self._dead_scaner = dead_scaner
         self._health_scaner = health_scaner
         self._replay_service = replay_service
         self._health_observe = health_observe
@@ -66,13 +63,6 @@ class BattleUseCase:
             self._replay_service.replay(lose=True, stop_event=stop_event)
             return battle_state, True
 
-        has_dead = self._dead_scaner.has_dead(team_len=len(battle_state.current_team))
-
-        if has_dead:
-            logger.info("Переигровка уровня: умер титан")
-            self._replay_service.replay(lose=False, stop_event=stop_event)
-            return battle_state, True
-
         # ожидаем, так как анимация перекрывает полоски здоровья/энергии
         if stop_event.wait(randomizer.uniform(2.3, 4.2)):
             raise StopApplicationError()
@@ -80,7 +70,7 @@ class BattleUseCase:
         health_list = self._health_scaner.scan_health(battle_state)
 
         if not self.__dead_sentinel(health_list):
-            logger.info("Есть титаны с 0 ХП, переигровка")
+            logger.info("Переигровка уровня: умер титан")
             self._replay_service.replay(lose=False, stop_event=stop_event)
             return battle_state, True
 

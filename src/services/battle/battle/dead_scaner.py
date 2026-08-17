@@ -21,7 +21,6 @@ class DeadScanService:
 
     def has_dead(self, team_len: int) -> bool:
         windows = deepcopy(self._windows[team_len])
-        self._clicker.hide_mouse()
 
         for window in windows:
             start_x, start_y = window

@@ -41,7 +41,6 @@ class FloorTransitService:
 
     def __click(self, cfg: ButtonConfig, stop_event: Event) -> None:
         start = time.perf_counter()
-        self._clicker.hide_mouse()
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():

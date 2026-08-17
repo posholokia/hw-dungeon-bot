@@ -40,7 +40,6 @@ class RoomFinderService:
     def find_elements(self, stop_event: Event) -> dict[RoomElement, ElementPosition]:
         start = time.perf_counter()
         logger.info("Поиск элементов в комнате")
-        self._clicker.hide_mouse()
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():

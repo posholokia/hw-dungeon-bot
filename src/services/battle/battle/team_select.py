@@ -116,7 +116,6 @@ class TeamSelectService:
         time.sleep(randomizer.uniform(1.23, 1.96))
 
         for pos, cfg in self._selection_cfg.check_positions.items():
-            self._clicker.hide_mouse()
             fingerprint = take_print(cfg.coordinates)
             logger.debug(f"Чек позиции {pos}, отпечаток: {fingerprint}")
 

@@ -124,6 +124,9 @@ class WaitClickCheckService:
                     founded = key
                     break
 
+            if founded is not None:
+                break
+
             if stop_event.wait(timeout=0.005):
                 raise ApplicationError()
 
