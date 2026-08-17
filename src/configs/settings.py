@@ -1,8 +1,8 @@
 import pathlib
 import sys
-from typing import Self
+from typing import Any, Self
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 from pydantic_settings import (
     BaseSettings,
     JsonConfigSettingsSource,
@@ -146,11 +146,21 @@ class DropGameConfig(BaseSettings):
 
 
 class AppSettings(BaseSettings):
-    room: RoomConfigs = Field(default_factory=RoomConfigs)
-    selection: SelectionConfigs = Field(default_factory=SelectionConfigs)
-    battle: BattleConfigs = Field(default_factory=BattleConfigs)
-    floor_transit: FloorTransitConfig = Field(default_factory=FloorTransitConfig)
-    drop: DropGameConfig = Field(default_factory=DropGameConfig)
+    room: dict[RoomPosition, ButtonConfig]
+    selection: SelectionConfigs
+    battle: BattleConfigs
+    floor_transit: FloorTransitConfig
+    drop: DropGameConfig
+
+    @model_validator(mode="before")
+    @classmethod
+    def inject_fingerprint(cls, values: Any) -> Any:
+        fingerprint = values["room_fingerprint"]
+
+        for button in values["room"].values():
+            button["fingerprint"] = fingerprint
+
+        return values
 
     @classmethod
     def settings_customise_sources(

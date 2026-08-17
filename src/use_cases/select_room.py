@@ -1,3 +1,4 @@
+from logging import Logger
 from threading import Event
 
 from structlog import get_logger
@@ -8,7 +9,7 @@ from services.battle.dto import BattleState
 from services.select_room.scaner import RoomFinderService
 from services.select_room.selector import SelectRoomService
 
-logger = get_logger(__name__)
+logger: Logger = get_logger(__name__)
 
 
 class SelectRoomUseCase:
@@ -26,14 +27,16 @@ class SelectRoomUseCase:
         self, state: State, battle_state: BattleState, stop_event: Event
     ) -> None:
         try:
-            # обнаружение и клик на комнату
-            room_position = self._finder.find_room(stop_event)
-            logger.debug(f"Room found at {room_position}")
-            self._selector.click_room(room_position)
+            logger.info("Поиск комнаты в left/right/center")
+            self._selector.select_room(stop_event)
             # обнаружение и выбор элемента в комнате
             elements = self._finder.find_elements(stop_event)
             logger.debug(f"Элементы в комнате: {elements}")
-            self._selector.select_room_element(state, battle_state, elements)
+            element = self._selector.select_room_element(
+                battle_state, elements, stop_event
+            )
+            state.room_element = element
+            logger.debug(f"Выбран элемент {element}")
         except ApplicationError:
             raise
         except Exception as e:

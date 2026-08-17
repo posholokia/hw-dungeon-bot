@@ -156,27 +156,26 @@ class DiContainer:
 
         def build_room_finder_service(context: ActivationScope) -> RoomFinderService:
             timeout = context.get(Timeout)
-            room_coordinates = self._config.room.coordinates
-            room_fingerprint = self._config.room.fingerprint
             element_coordinates = self._config.selection.coordinates
             element_fingerprint = self._config.selection.fingerprint
             clicker = context.get(IMouseClick)
             return RoomFinderService(
                 timeout=timeout,
-                room_coordinates=room_coordinates,
-                room_fingerprint=room_fingerprint,
                 element_coordinates=element_coordinates,
                 element_fingerprints=element_fingerprint,
                 clicker=clicker,
             )
 
         def build_select_room_service(context: ActivationScope) -> SelectRoomService:
-            click_areas = self._config.room.click_area
-            click_service = context.get(IMouseClick)
+            room_cfg = self._config.room
+            element_areas = self._config.selection.click_area
+            check_element = self._config.battle.autobattle
+            click_service = context.get(WaitClickCheckService)
             return SelectRoomService(
-                click_areas=click_areas,
-                click_service=click_service,
-                element_areas=self._config.selection.click_area,
+                room_cfg=room_cfg,
+                element_areas=element_areas,
+                check_element=check_element,
+                clicker=click_service,
             )
 
         def build_titan_catalog_service() -> TitanCatalog:

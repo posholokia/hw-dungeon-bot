@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+from logging import Logger
+from threading import Event
+
 from structlog import getLogger
 
 from domain.types import ElementPosition, RoomElement, RoomPosition
-from interfaces.output import IMouseClick
-from models.dto import ClickArea, State
+from exceptions import ApplicationError
+from interfaces.cfg import IScreenButton
+from models.dto import ClickArea
 from services.battle.dto import BattleState
+from services.wait_clicker import WaitClickCheckService
 
-logger = getLogger(__name__)
+logger: Logger = getLogger(__name__)
 
 
 class SelectRoomService:
@@ -16,34 +22,46 @@ class SelectRoomService:
 
     def __init__(
         self,
-        click_areas: dict[RoomPosition, ClickArea],
+        room_cfg: Mapping[RoomPosition, IScreenButton],
         element_areas: dict[ElementPosition, ClickArea],
-        click_service: IMouseClick,
+        check_element: IScreenButton,
+        clicker: WaitClickCheckService,
     ) -> None:
-        self._click_areas = click_areas
-        self._click_service = click_service
+        self._room_cfg = room_cfg
+        self._clicker = clicker
         self._element_areas = element_areas
+        self._check_element = check_element
 
-    def click_room(self, position: RoomPosition) -> None:
-        area = self._click_areas[position]
-        self._click_service.mouse_click((area.x, area.y), area.width, area.height)
+    def select_room(self, stop_event: Event) -> None:
+        room_pos = self._clicker.find_and_click_check(
+            screen=self._room_cfg, stop_event=stop_event
+        )
+        logger.info(f"Комната найдена в позиции '{room_pos}'")
 
     def select_room_element(
         self,
-        state: State,
         battle_state: BattleState,
         elements: dict[RoomElement, ElementPosition],
-    ) -> None:
+        stop_event: Event,
+    ) -> RoomElement:
         if battle_state.need_healing and "common" in elements:
-            state.room_element = "common"
-            area = self._element_areas[elements["common"]]
-            self._click_service.mouse_click((area.x, area.y), area.width, area.height)
+            room_element: RoomElement = "common"
         else:
             for element in self.PRIORITY:
                 if element in elements:
-                    area = self._element_areas[elements[element]]
-                    self._click_service.mouse_click(
-                        (area.x, area.y), area.width, area.height
-                    )
-                    state.room_element = element
-                    return
+                    room_element = element
+                    break
+            else:
+                raise ApplicationError("Неизвестный элемент комнаты")
+
+        clicked = self._clicker.click_and_check(
+            area=self._element_areas[elements[room_element]],
+            coordinates=self._check_element.coordinates,
+            fingerprint=self._check_element.fingerprint,
+            stop_event=stop_event,
+            match=True,
+        )
+        if clicked:
+            return room_element
+
+        raise ApplicationError("не удалось выбрать элемент комнаты")

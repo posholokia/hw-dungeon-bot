@@ -28,37 +28,14 @@ class RoomFinderService:
     def __init__(
         self,
         timeout: Timeout,
-        room_coordinates: dict[RoomPosition, CoordinateList],
-        room_fingerprint: FingerPrint,
         element_coordinates: dict[ElementPosition, CoordinateList],
         element_fingerprints: dict[RoomElement, FingerPrint],
         clicker: IMouseClick,
     ) -> None:
         self._timeout = timeout
-        self._room_coordinates = room_coordinates
-        self._room_fingerprint = room_fingerprint
         self._element_coordinates = element_coordinates
         self._element_fingerprints = element_fingerprints
         self._clicker = clicker
-
-    def find_room(self, stop_event: Event) -> RoomPosition:
-        start = time.perf_counter()
-        logger.info("Поиск комнаты в left/right/center")
-        self._clicker.hide_mouse()
-
-        while time.perf_counter() - start < self._timeout:
-            if stop_event.is_set():
-                raise StopApplicationError()
-
-            position = self._find_any_room()
-            if position is not None:
-                logger.info(f"Комната найдена в {position}")
-                return position
-
-            if stop_event.wait(timeout=0.005):
-                raise StopApplicationError()
-
-        raise ApplicationError("Room not found")
 
     def find_elements(self, stop_event: Event) -> dict[RoomElement, ElementPosition]:
         start = time.perf_counter()
@@ -71,23 +48,12 @@ class RoomFinderService:
 
             found = self._find_all_elements()
             if found:
-                logger.info(f"Доступные элементы: {found}")
                 return found
 
             if stop_event.wait(timeout=0.005):
                 raise StopApplicationError()
 
         raise ApplicationError("No elements found")
-
-    def _find_any_room(self) -> RoomPosition | None:
-        for position in _POSITIONS:
-            coordinates = self._room_coordinates[position]
-            fingerprint = take_print(coordinates)
-
-            if match_fingerprint(fingerprint, self._room_fingerprint):
-                return position
-
-        return None
 
     def _find_all_elements(self) -> dict[RoomElement, ElementPosition]:
         found: dict[RoomElement, ElementPosition] = {}
