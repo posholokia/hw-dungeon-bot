@@ -48,6 +48,11 @@ class TeamSelectService:
         )
         # убираем лишних титанов
         click_order = self._click_position_order(current_titans, expected_titans)
+        # добавляем клики в пустые позиции, на случай ошибок сканирования:
+        # титан есть но из-за лага при сканировании позиция распознана как пустая
+        if (empty := 5 - len(current_titans)) > 0:
+            click_order.extend([4 - i for i in range(empty)])
+
         for click_area_idx in click_order:
             area = self._selected_click_areas[click_area_idx]
             self._clicker.mouse_click(area.c, area.width, area.height)
