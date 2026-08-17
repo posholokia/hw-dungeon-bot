@@ -51,7 +51,9 @@ class TeamSelectService:
         for click_area_idx in click_order:
             area = self._selected_click_areas[click_area_idx]
             self._clicker.mouse_click(area.c, area.width, area.height)
+            time.sleep(0.05)
 
+        self._clicker.hide_mouse()
         # выбираем недостающих титанов
         for titan in missing:
             self._select_titan(titan, element)
@@ -113,7 +115,7 @@ class TeamSelectService:
         if element == "common":
             self.__set_filter(titan)
 
-        time.sleep(randomizer.uniform(1.23, 1.96))
+        time.sleep(randomizer.uniform(0.96, 1.47))
 
         for pos, cfg in self._selection_cfg.check_positions.items():
             fingerprint = take_print(cfg.coordinates)

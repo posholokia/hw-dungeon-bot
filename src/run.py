@@ -1,5 +1,7 @@
 import copy
+import time
 from dataclasses import dataclass
+from logging import Logger
 from threading import Event
 
 from structlog import get_logger
@@ -13,7 +15,7 @@ from services.return_to_game import ReturnGameService
 from use_cases.battle import BattleUseCase
 from use_cases.select_room import SelectRoomUseCase
 
-logger = get_logger(__name__)
+logger: Logger = get_logger(__name__)
 
 
 @dataclass
@@ -45,6 +47,7 @@ class BotOrchestration:
         )
         level = input("Текущий уровень: ")
         state.current_level = int(level)
+        start = time.perf_counter()
 
         while not stop_event.is_set():
             try:
@@ -65,6 +68,16 @@ class BotOrchestration:
 
                 logger.info(f"Пройдено {state.levels_completed} уровней")
                 logger.debug(f"Текущий уровень: {state.current_level}")
+
+                if state.levels_completed % 10 == 0:
+                    time_per_level = (
+                        time.perf_counter() - start
+                    ) / state.levels_completed
+                    time_per_100 = round(time_per_level * 100 / 60, 1)
+                    logger.debug(
+                        f"Скорость прохождения уровней: {time_per_100} минут на 100 уровней"
+                    )
+
             except StopApplicationError as e:
                 battle_state.clear()
                 logger.info(e.__str__())

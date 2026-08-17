@@ -26,7 +26,7 @@ class WaitClickCheckService:
     ) -> None:
         self._clicker = clicker
         self._timeout = timeout
-        self._max_iterations = 10
+        self._max_iterations = 6
 
     def wait_click_check(
         self,
@@ -179,7 +179,7 @@ class WaitClickCheckService:
             # кликаем
             self._clicker.mouse_click(area.c, area.width, area.height)
             # ждем
-            if stop_event.wait(0.1):
+            if stop_event.wait(0.25):
                 return False
             # проверяем что экран сменился
             scanned = take_print(coordinates)

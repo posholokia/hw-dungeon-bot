@@ -1,10 +1,8 @@
-import copy
 import time
 from threading import Event
 
 from structlog import getLogger
 
-from core.randomizer import randomizer
 from domain.types import CoordinateList, FingerPrint, Timeout
 from exceptions import ApplicationError, StopApplicationError
 from interfaces.cfg import IScreenButton
@@ -37,41 +35,79 @@ class BattleScannerService:
         self._waiter = waiter
 
     def scan_team(self) -> set[str]:
-        time.sleep(randomizer.uniform(2.33, 3.06))
         current_team: set[str] = set()
-        catalog: dict[str, Titan] = copy.deepcopy(self._titan_catalog.get_titans())
-        fingerprints_by_pos: dict[int, FingerPrint] = {}
+        catalog: dict[str, Titan] = self._titan_catalog.get_titans()
 
         for i, coords in enumerate(self._analyze_team_coords, start=1):
-            fingerprints_by_pos[i] = take_print(coords)
+            discovered = False
+            start = time.perf_counter()
+            scans = []  # debug only
 
-        logger.debug(f"Отпечатки команды: {fingerprints_by_pos}")
+            while not discovered and time.perf_counter() - start < 5:
+                scanned = take_print(coords)
+                scans.append(scanned)
 
-        matched_pos: list[int] = []
-        for name, titan in catalog.items():
-            for pos, fingerprint in fingerprints_by_pos.items():
-                matched = match_fingerprint(
-                    fingerprint, titan.fingerprint, tolerance=17
+                for name, titan in catalog.items():
+                    matched = match_fingerprint(
+                        scanned, titan.fingerprint, tolerance=17
+                    )
+                    if matched:
+                        discovered = True
+                        if titan.name == "<EMPTY>":
+                            logger.info(f"Позиция {i} пустая")
+                            continue
+
+                        current_team.add(name)
+                        logger.info(
+                            f"Обнаружен титан: Позиция {i}, {name}, "
+                            f"команда: {current_team}"
+                        )
+                        break
+                time.sleep(0.05)
+
+            if not discovered:
+                raise ApplicationError(
+                    f"Не удалось сматчить титана в позиции {i}, отпечатки: {scans}"
                 )
 
-                if matched:
-                    matched_pos.append(pos)
-                    if titan.name == "<EMPTY>":
-                        logger.info(f"Позиция {pos} пустая")
-                        continue
-
-                    current_team.add(name)
-                    logger.info(
-                        f"Обнаружен титан: Позиция {pos}, {name}, команда: {current_team}"
-                    )
-                    del fingerprints_by_pos[pos]
-                    break
-
-        if len(matched_pos) != 5:
-            raise ApplicationError(
-                f"Не удалось сматчить все позиции. Сматчены позиции: {matched_pos}"
-            )
         return current_team
+
+    # def scan_team(self) -> set[str]:
+    #     time.sleep(2.4)
+    #     current_team: set[str] = set()
+    #     catalog: dict[str, Titan] = self._titan_catalog.get_titans()
+    #     fingerprints_by_pos: dict[int, FingerPrint] = {}
+
+    #     for i, coords in enumerate(self._analyze_team_coords, start=1):
+    #         fingerprints_by_pos[i] = take_print(coords)
+
+    #     logger.debug(f"Отпечатки команды: {fingerprints_by_pos}")
+
+    #     matched_pos: list[int] = []
+    #     for name, titan in catalog.items():
+    #         for pos, fingerprint in fingerprints_by_pos.items():
+    #             matched = match_fingerprint(
+    #                 fingerprint, titan.fingerprint, tolerance=17
+    #             )
+
+    #             if matched:
+    #                 matched_pos.append(pos)
+    #                 if titan.name == "<EMPTY>":
+    #                     logger.info(f"Позиция {pos} пустая")
+    #                     continue
+
+    #                 current_team.add(name)
+    #                 logger.info(
+    #                     f"Обнаружен титан: Позиция {pos}, {name}, команда: {current_team}"
+    #                 )
+    #                 del fingerprints_by_pos[pos]
+    #                 break
+
+    #     if len(matched_pos) != 5:
+    #         raise ApplicationError(
+    #             f"Не удалось сматчить все позиции. Сматчены позиции: {matched_pos}"
+    #         )
+    #     return current_team
 
     def scan_autobattle(self, stop_event: Event) -> None:
         logger.info("Ожидание кнопки автобоя")

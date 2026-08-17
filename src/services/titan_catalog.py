@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from pathlib import Path
 
 from domain.types import FingerPrint
@@ -27,4 +28,4 @@ class TitanCatalog:
         return self._titans_by_fingerprint[points]
 
     def get_titans(self) -> dict[str, Titan]:
-        return self._titans_by_name
+        return deepcopy(self._titans_by_name)
