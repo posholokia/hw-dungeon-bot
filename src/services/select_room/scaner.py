@@ -46,7 +46,8 @@ class RoomFinderService:
                 raise StopApplicationError()
 
             found = self._find_all_elements()
-            if found:
+
+            if self._validate_elements(found):
                 return found
 
             if stop_event.wait(timeout=0.005):
@@ -68,3 +69,14 @@ class RoomFinderService:
             if match_fingerprint(scanned, self._element_fingerprints[element]):
                 return element
         return None
+
+    def _validate_elements(
+        self,
+        elements: dict[RoomElement, ElementPosition],
+    ) -> bool:
+        if len(elements) == 1:
+            return set(elements.values()) == {"center"}
+        elif len(elements) == 2:
+            return set(elements.values()) == {"left", "right"}
+        else:
+            return False
