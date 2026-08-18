@@ -35,6 +35,7 @@ class BattleScannerService:
         self._waiter = waiter
 
     def scan_team(self) -> set[str]:
+        time.sleep(1.2)
         current_team: list[str] = []
         catalog: dict[str, Titan] = self._titan_catalog.get_titans()
 

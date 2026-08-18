@@ -64,7 +64,7 @@ class BattleUseCase:
             return battle_state, True
 
         # ожидаем, так как анимация перекрывает полоски здоровья/энергии
-        if stop_event.wait(randomizer.uniform(2.3, 4.2)):
+        if stop_event.wait(randomizer.uniform(2.2, 2.6)):
             raise StopApplicationError()
 
         health_list = self._health_scaner.scan_health(battle_state)

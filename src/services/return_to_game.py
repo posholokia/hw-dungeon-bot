@@ -32,10 +32,22 @@ class ReturnGameService:
 
         logger.debug("Выявлен экран вылета игры")
         logger.debug("Ожидание загрузки игры")
-        if not self._clicker.wait_click_check(self._cfg.guild, stop_event):
+        if not self._clicker.wait(
+            self._cfg.guild.coordinates, self._cfg.guild.fingerprint, stop_event
+        ):
             return False
-        time.sleep(randomizer.uniform(1.76, 2.94))
+        logger.debug("Переход в гильдию")
+        time.sleep(randomizer.uniform(2.16, 2.74))
+        if not self._clicker.click_and_check(
+            area=self._cfg.guild.click_area,
+            coordinates=self._cfg.guild.coordinates,
+            fingerprint=self._cfg.guild.fingerprint,
+            stop_event=stop_event,
+            match=False,
+        ):
+            return False
         logger.debug("Переход в подземелье")
+        time.sleep(randomizer.uniform(2.07, 2.43))
         res = self._clicker.wait_click_check(self._cfg.dungeon, stop_event)
         time.sleep(randomizer.uniform(2.44, 3.36))
         return res
