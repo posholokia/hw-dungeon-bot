@@ -23,14 +23,8 @@ class ReturnGameService:
     def execute(self, stop_event: Event) -> bool:
         """
         Returns:
-            bool - это экран вылета игры и сценарий выполнен успешно
+            bool - статус перехода в подземелье
         """
-        is_drop_screen = self._clicker.wait_click_check(self._cfg.screen, stop_event)
-        if not is_drop_screen:
-            logger.debug("Экран вылета игры не выявлен")
-            return False
-
-        logger.debug("Выявлен экран вылета игры")
         logger.debug("Ожидание загрузки игры")
         if not self._clicker.wait(
             self._cfg.guild.coordinates, self._cfg.guild.fingerprint, stop_event
@@ -48,6 +42,6 @@ class ReturnGameService:
             return False
         logger.debug("Переход в подземелье")
         time.sleep(randomizer.uniform(4.07, 4.43))
-        res = self._clicker.wait_click_check(self._cfg.dungeon, stop_event)
+        success = self._clicker.wait_click_check(self._cfg.dungeon, stop_event)
         time.sleep(randomizer.uniform(3.44, 4.36))
-        return res
+        return success
