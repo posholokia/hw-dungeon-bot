@@ -1,3 +1,4 @@
+import argparse
 import sys
 from functools import partial
 from threading import Event
@@ -16,12 +17,34 @@ def _run_bot(
     runner: BotOrchestration,
     stop_event: Event,
     overlay: OverlayProcessor,
+    level: int,
+    complete: int,
 ) -> None:
     setup_logging(overlay)
-    runner.run(stop_event)
+    runner.run(level, complete, stop_event)
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Мой Python-скрипт")
+
+    parser.add_argument(
+        "-l",
+        "--level",
+        type=int,
+        required=False,
+        help="Максимальный уровень",
+        default=0,
+    )
+    parser.add_argument(
+        "-c",
+        "--complete",
+        type=int,
+        required=False,
+        help="Пройти уровней",
+        default=0,
+    )
+    args = parser.parse_args()
+
     container = get_container()
     stop_event = Event()
 
@@ -29,7 +52,9 @@ def main() -> None:
     qa_app = container.get(QaApp)
     overlay = container.get(OverlayProcessor)
 
-    worker = partial(_run_bot, bot_runner, stop_event, overlay)
+    worker = partial(
+        _run_bot, bot_runner, stop_event, overlay, args.level, args.complete
+    )
     qa_app.run(worker, show_click_marker=True)
 
 

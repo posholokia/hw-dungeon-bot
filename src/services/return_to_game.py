@@ -34,10 +34,10 @@ class ReturnGameService:
         time.sleep(randomizer.uniform(3.16, 3.74))
         if not self._clicker.click_and_check(
             area=self._cfg.guild.click_area,
-            coordinates=self._cfg.guild.coordinates,
-            fingerprint=self._cfg.guild.fingerprint,
+            coordinates=self._cfg.dungeon.coordinates,
+            fingerprint=self._cfg.dungeon.fingerprint,
             stop_event=stop_event,
-            match=False,
+            match=True,
         ):
             return False
         logger.debug("Переход в подземелье")
