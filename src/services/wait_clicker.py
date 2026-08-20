@@ -26,7 +26,7 @@ class WaitClickCheckService:
     ) -> None:
         self._clicker = clicker
         self._timeout = timeout
-        self._max_iterations = 6
+        self._max_iterations = 7
 
     def wait_click_check(
         self,
@@ -174,13 +174,13 @@ class WaitClickCheckService:
             False: После клика не появился ожидаемый экран.
         """
         i = 0
-
+        # кликаем
+        self._clicker.mouse_click(area.c, area.width, area.height)
+        # ждем
+        if stop_event.wait(0.25):
+            return False
+        
         while True:
-            # кликаем
-            self._clicker.mouse_click(area.c, area.width, area.height)
-            # ждем
-            if stop_event.wait(0.25):
-                return False
             # проверяем что экран сменился
             scanned = take_print(coordinates)
             if (
@@ -190,6 +190,10 @@ class WaitClickCheckService:
                 and not match_fingerprint(scanned, fingerprint)
             ):
                 return True
+            
+            if stop_event.wait(1):
+                return False
+            
             # ограничиваем максимум кликов
             i += 1
             if i >= self._max_iterations:
