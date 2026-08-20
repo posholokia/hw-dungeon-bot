@@ -11,8 +11,8 @@ from exceptions import RetryApplicationError, StopApplicationError
 from models.dto import State
 from services.battle.dto import BattleState
 from services.floor_transit import FloorTransitService
-from services.return_to_game import ReturnGameService
 from use_cases.battle import BattleUseCase
+from use_cases.reloader import ReloadGameUseCase
 from use_cases.select_room import SelectRoomUseCase
 
 logger: Logger = get_logger(__name__)
@@ -31,7 +31,7 @@ class BotOrchestration:
         battle_use_case: BattleUseCase,
         floor_service: FloorTransitService,
         cfg: BattleStateCfg,
-        return_service: ReturnGameService,
+        return_service: ReloadGameUseCase,
     ) -> None:
         self._select_room = select_room_use_case
         self._battle = battle_use_case
@@ -39,15 +39,22 @@ class BotOrchestration:
         self._floor_service = floor_service
         self._return_service = return_service
 
-    def run(self, stop_event: Event) -> None:
+    def run(self, max_level: int, complete: int, stop_event: Event) -> None:
         state = State()
         battle_state = BattleState(
             teams=copy.deepcopy(self._cfg.teams),
             healing_team=copy.deepcopy(self._cfg.healing_team),
         )
+        complete = complete or 1000
         level = input("Текущий уровень: ")
         state.current_level = int(level)
         start = time.perf_counter()
+        bot_reloaded = False
+
+        if max_level:
+            logger.info(f"Условие остановки бота: достигнуть уровня {max_level}")
+        else:
+            logger.info(f"Условие остановки бота: пройти {complete} уровней")
 
         while not stop_event.is_set():
             try:
@@ -62,12 +69,15 @@ class BotOrchestration:
                 self._floor_service.transit(state, stop_event)
                 self._win(battle_state, state)
 
-                if state.levels_completed >= 1000:
-                    logger.info("Лимит уровней пройден")
-                    return
-
                 logger.info(f"Пройдено {state.levels_completed} уровней")
                 logger.debug(f"Текущий уровень: {state.current_level}")
+
+                if max_level and state.current_level == max_level:
+                    logger.info(f"Уровень {max_level} достигнут, завершение работы...")
+                    return
+                elif not max_level and state.levels_completed == complete:
+                    logger.info(f"Пройдено {complete} уровней, завершение работы...")
+                    return
 
                 if state.levels_completed % 10 == 0:
                     time_per_level = (
@@ -77,7 +87,7 @@ class BotOrchestration:
                     logger.debug(
                         f"Скорость прохождения уровней: {time_per_100} минут на 100 уровней"
                     )
-
+                bot_reloaded = False
             except StopApplicationError as e:
                 battle_state.clear()
                 logger.info(e.__str__())
@@ -86,13 +96,22 @@ class BotOrchestration:
                 battle_state.clear()
                 logger.info(e.__str__())
                 logger.debug("Проверка игры на вылет")
-                game_dropped = self._return_service.execute(stop_event)
+                game_dropped = self._return_service.reload_after_drop(stop_event)
 
                 if game_dropped:
                     continue
                 else:
-                    logger.warning("Ошибка приложения, завершение работы...")
-                    return
+                    if bot_reloaded:
+                        logger.warning("Ошибка приложения, завершение работы...")
+                        return
+
+                    reloaded = self._return_service.reload_after_error(stop_event)
+                    if reloaded:
+                        bot_reloaded = True
+                        continue
+                    else:
+                        logger.warning("Ошибка приложения, завершение работы...")
+                        return
             except Exception as e:
                 battle_state.clear()
                 logger.exception(e.__str__())

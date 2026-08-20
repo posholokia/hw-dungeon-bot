@@ -20,6 +20,7 @@ dependencies = [
     "rodi>=2.1.0",
     "ruff>=0.16.2",
     "structlog>=26.1.0",
+    "types-pynput>=1.8.1.20260712",
 ]
 
 [dependency-groups]

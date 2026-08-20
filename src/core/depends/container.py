@@ -6,6 +6,7 @@ from configs.settings import get_settings
 from core.logger.processors.overlay import OverlayProcessor
 from domain.types import PreviewSeconds, Timeout
 from interfaces.output import IMouseClick
+from output.keyboard import KeyBoardOutput
 from output.mouse.mouse import MouseController
 from run import BattleStateCfg, BotOrchestration
 from services.battle.battle.healing import HealthObserveService
@@ -21,6 +22,7 @@ from services.select_room.selector import SelectRoomService
 from services.titan_catalog import TitanCatalog
 from services.wait_clicker import WaitClickCheckService
 from use_cases.battle import BattleUseCase
+from use_cases.reloader import ReloadGameUseCase
 from use_cases.select_room import SelectRoomUseCase
 from widgets.click_marker import ClickMarker
 from widgets.log_overlay import LogOverlayWindow
@@ -75,7 +77,7 @@ class DiContainer:
                 teams=self._config.battle.teams,
                 healing_team=self._config.battle.healing_team,
             )
-            return_service = context.get(ReturnGameService)
+            return_service = context.get(ReloadGameUseCase)
 
             return BotOrchestration(
                 select_room_use_case=select_uc,
@@ -87,6 +89,21 @@ class DiContainer:
 
         self._container.register_factory(
             build_orchestration, BotOrchestration, life_style=ServiceLifeStyle.SINGLETON
+        )
+
+        def build_reload_uc(context: ActivationScope) -> ReloadGameUseCase:
+            return_game_service = context.get(ReturnGameService)
+            keyboard = context.get(KeyBoardOutput)
+            clicker = context.get(WaitClickCheckService)
+            return ReloadGameUseCase(
+                return_game_service=return_game_service,
+                keyboard=keyboard,
+                clicker=clicker,
+                drop_screen=self._config.drop.screen,
+            )
+
+        self._container.register_factory(
+            build_reload_uc, ReloadGameUseCase, life_style=ServiceLifeStyle.TRANSIENT
         )
 
     def __init_services(self) -> None:
@@ -267,6 +284,7 @@ class DiContainer:
 
         self._container.add_singleton_by_factory(build_return_game, ReturnGameService)
         self._container.register(WaitClickCheckService, WaitClickCheckService)
+        self._container.register(KeyBoardOutput, KeyBoardOutput)
 
     def __init_types(self) -> None:
         def build_timeout() -> Timeout:
