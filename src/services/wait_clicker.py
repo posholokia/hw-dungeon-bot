@@ -179,7 +179,7 @@ class WaitClickCheckService:
         # ждем
         if stop_event.wait(0.25):
             return False
-        
+
         while True:
             # проверяем что экран сменился
             scanned = take_print(coordinates)
@@ -190,11 +190,13 @@ class WaitClickCheckService:
                 and not match_fingerprint(scanned, fingerprint)
             ):
                 return True
-            
-            if stop_event.wait(1):
-                return False
-            
+
             # ограничиваем максимум кликов
             i += 1
             if i >= self._max_iterations:
                 return False
+
+            if stop_event.wait(1):
+                return False
+
+            self._clicker.mouse_click(area.c, area.width, area.height)
