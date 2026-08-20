@@ -145,7 +145,7 @@ class DiContainer:
 
         def build_replay_service(context: ActivationScope) -> ReplayService:
             timeout = context.get(Timeout)
-            clicker = context.get(IMouseClick)
+            clicker = context.get(WaitClickCheckService)
             return ReplayService(
                 replay_conditions=self._config.battle.replay.replay_conditions,
                 timeout=timeout,
