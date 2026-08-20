@@ -2,7 +2,6 @@ name: Build Windows
 
 on:
   push:
-    branches: [main, master]
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
@@ -33,14 +32,6 @@ jobs:
 
       - name: Build executable
         run: uv run pyinstaller --noconfirm hw_dungeon_bot.spec
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hw-dungeon-bot-windows
-          path: dist/hw-dungeon-bot.exe
-          if-no-files-found: error
-          retention-days: 14
 
       - name: Upload release asset
         if: startsWith(github.ref, 'refs/tags/')
