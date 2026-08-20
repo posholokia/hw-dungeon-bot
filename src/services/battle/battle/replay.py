@@ -7,9 +7,9 @@ from structlog import getLogger
 from configs.settings import ButtonConfig, ReplayButtonsConfig
 from domain.types import Timeout
 from exceptions import ApplicationError
-from interfaces.output import IMouseClick
 from services.battle.dto import TitanStatus
 from services.fingerprint_match import match_fingerprint
+from services.wait_clicker import WaitClickCheckService
 from vision.screen import take_print
 
 logger: Logger = getLogger(__name__)
@@ -21,7 +21,7 @@ class ReplayService:
         timeout: Timeout,
         replay_conditions: dict[str, list[str]],
         replay_buttons: ReplayButtonsConfig,
-        clicker: IMouseClick,
+        clicker: WaitClickCheckService,
     ) -> None:
         self._timeout = timeout
         self._replay_conditions = replay_conditions
@@ -42,33 +42,26 @@ class ReplayService:
     def replay(self, lose: bool, stop_event: Event) -> None:
         key = "lose" if lose else "win"
         logger.info("Ожидание кнопки 'Еще раз'")
-        self.__click_button(self._replay_buttons.replay[key], stop_event)
+        self._clicker.wait_click_check(
+            self._replay_buttons.replay[key], 
+            stop_event,
+        )
         logger.info("Ожидание кнопки паузы боя")
-        self.__click_button(self._replay_buttons.pause, stop_event)
+        self._clicker.wait_click_check(
+            self._replay_buttons.pause, 
+            stop_event,
+        )
         logger.info("Ожидание кнопки 'Отступить'")
-        self.__click_button(self._replay_buttons.retreat, stop_event)
+        self._clicker.wait_click_check(
+            self._replay_buttons.retreat, 
+            stop_event,
+        )
 
     def apply_result(self, stop_event: Event) -> None:
-        self.__click_button(self._replay_buttons.ok, stop_event)
-
-    def __click_button(self, cfg: ButtonConfig, stop_event: Event) -> None:
-        start = time.perf_counter()
-
-        while time.perf_counter() - start < self._timeout:
-            if stop_event.is_set():
-                return
-
-            fingerprint = take_print(cfg.coordinates)
-
-            if match_fingerprint(fingerprint, cfg.fingerprint):
-                area = cfg.click_area
-                self._clicker.mouse_click(area.c, area.width, area.height)
-                return
-
-            if stop_event.wait(0.005):
-                return
-
-        raise ApplicationError("Не найдено кнопки")
+        self._clicker.wait_click_check(
+            self._replay_buttons.ok, 
+            stop_event,
+        )
 
     def __check_criterion(self, titan: TitanStatus, criterion: str) -> bool:
         """
