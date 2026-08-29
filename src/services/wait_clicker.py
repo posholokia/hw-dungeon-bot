@@ -177,7 +177,7 @@ class WaitClickCheckService:
         # кликаем
         self._clicker.mouse_click(area.c, area.width, area.height)
         # ждем
-        if stop_event.wait(0.25):
+        if stop_event.wait(0.3):
             return False
 
         while True:
@@ -196,7 +196,7 @@ class WaitClickCheckService:
             if i >= self._max_iterations:
                 return False
 
+            self._clicker.mouse_click(area.c, area.width, area.height)
+
             if stop_event.wait(1):
                 return False
-
-            self._clicker.mouse_click(area.c, area.width, area.height)

@@ -64,6 +64,7 @@ class SelectionConfig(BaseSettings):
     elements: dict[TitanElement, ClickArea]
     roles: dict[TitanRole, ClickArea]
     check_positions: dict[str, IconPositionConfig]
+    clear_filters: dict[str, ClickArea]
 
 
 class BattleResultConfig(BaseSettings):

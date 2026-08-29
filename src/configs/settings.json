@@ -408,6 +408,20 @@
                         [723, 368]
                     ]
                 }
+            },
+            "clear_filters": {
+                "filter_element": {
+                    "x": 64,
+                    "y": 534,
+                    "width": 46,
+                    "height": 46
+                },
+                "filter_role": {
+                    "x": 64,
+                    "y": 650,
+                    "width": 46,
+                    "height": 46
+                },
             }
         },
         "autobattle": {

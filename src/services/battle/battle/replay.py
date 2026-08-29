@@ -1,16 +1,12 @@
-import time
 from logging import Logger
 from threading import Event
 
 from structlog import getLogger
 
-from configs.settings import ButtonConfig, ReplayButtonsConfig
+from configs.settings import ReplayButtonsConfig
 from domain.types import Timeout
-from exceptions import ApplicationError
 from services.battle.dto import TitanStatus
-from services.fingerprint_match import match_fingerprint
 from services.wait_clicker import WaitClickCheckService
-from vision.screen import take_print
 
 logger: Logger = getLogger(__name__)
 
@@ -43,23 +39,23 @@ class ReplayService:
         key = "lose" if lose else "win"
         logger.info("Ожидание кнопки 'Еще раз'")
         self._clicker.wait_click_check(
-            self._replay_buttons.replay[key], 
+            self._replay_buttons.replay[key],
             stop_event,
         )
         logger.info("Ожидание кнопки паузы боя")
         self._clicker.wait_click_check(
-            self._replay_buttons.pause, 
+            self._replay_buttons.pause,
             stop_event,
         )
         logger.info("Ожидание кнопки 'Отступить'")
         self._clicker.wait_click_check(
-            self._replay_buttons.retreat, 
+            self._replay_buttons.retreat,
             stop_event,
         )
 
     def apply_result(self, stop_event: Event) -> None:
         self._clicker.wait_click_check(
-            self._replay_buttons.ok, 
+            self._replay_buttons.ok,
             stop_event,
         )
 

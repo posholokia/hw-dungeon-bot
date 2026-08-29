@@ -132,9 +132,14 @@ class TeamSelectService:
         raise ApplicationError()
 
     def __set_filter(self, titan: Titan) -> None:
+        cfe, cfr = tuple(self._selection_cfg.clear_filters.values())
         filter_area = self._selection_cfg.filter_button
         element_area = self._selection_cfg.elements[titan.element]
         role_area = self._selection_cfg.roles[titan.role]
+        # очистка фильтров
+        self._clicker.mouse_click(cfe.c, cfe.width, cfe.height)
+        self._clicker.mouse_click(cfr.c, cfr.width, cfr.height)
+        # выбор фильтров
         self._clicker.mouse_click(filter_area.c, filter_area.width, filter_area.height)
         self._clicker.mouse_click(
             element_area.c, element_area.width, element_area.height
