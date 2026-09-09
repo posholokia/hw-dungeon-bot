@@ -9,6 +9,7 @@ from threading import Event
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 
+from configs.settings import debug
 from widgets.click_marker import ClickMarker
 from widgets.log_overlay import LogOverlayWindow
 
@@ -43,8 +44,9 @@ class QaApp:
         if app is None:
             app = QApplication(sys.argv[:1])
 
-        overlay = self._get_log_window()
-        overlay.show()
+        if debug():
+            overlay = self._get_log_window()
+            overlay.show()
 
         marker: ClickMarker | None = None
         if show_click_marker:
@@ -93,7 +95,8 @@ class QaApp:
             if marker is not None:
                 marker.hide()
                 marker.close()
-            overlay.close()
+            if debug():
+                overlay.close()
 
         if worker is not None:
             worker.join(timeout=2)

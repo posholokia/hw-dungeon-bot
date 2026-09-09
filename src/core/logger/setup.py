@@ -2,21 +2,55 @@ import logging
 
 import structlog
 
-from core.logger.processors.overlay import OverlayProcessor
+from configs.settings import debug
+from core.logger.handlers.overlay import OverlayHandler
 
 
 def setup_logging(
-    overlay: OverlayProcessor,
+    overlay_handler: OverlayHandler,
     level: int = logging.DEBUG,
 ) -> None:
+    file_handler: logging.Handler = logging.FileHandler(
+        "bot.log",
+        encoding="utf-8",
+    )
+    stream_handler: logging.Handler = logging.StreamHandler()
+    handlers = [file_handler, stream_handler]
+
+    if debug():
+        handlers.append(overlay_handler)
+    
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
-            structlog.processors.add_log_level,
+            structlog.stdlib.filter_by_level,
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.PositionalArgumentsFormatter(),
             structlog.processors.TimeStamper(fmt="%H:%M:%S"),
-            overlay,
-            structlog.dev.ConsoleRenderer(),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
-        wrapper_class=structlog.make_filtering_bound_logger(level),
-        logger_factory=structlog.PrintLoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+    )
+    console_formatter = structlog.stdlib.ProcessorFormatter(
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.dev.ConsoleRenderer(colors=True),
+        ],
+    )
+    plain_formatter = structlog.stdlib.ProcessorFormatter(
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.dev.ConsoleRenderer(colors=False),
+        ],
+    )
+    stream_handler.setFormatter(console_formatter)
+    file_handler.setFormatter(plain_formatter)
+    overlay_handler.setFormatter(plain_formatter)
+
+    logging.basicConfig(
+        handlers=handlers,
+        level=level,
     )

@@ -39,20 +39,32 @@ class BotOrchestration:
         self._floor_service = floor_service
         self._return_service = return_service
 
-    def run(self, max_level: int, complete: int, stop_event: Event) -> None:
+    def run(
+        self,
+        target_level: int,
+        complete: int,
+        current_level: int,
+        stop_event: Event,
+    ) -> None:
         state = State()
         battle_state = BattleState(
             teams=copy.deepcopy(self._cfg.teams),
             healing_team=copy.deepcopy(self._cfg.healing_team),
         )
         complete = complete or 1000
-        level = input("Текущий уровень: ")
+
+        level: str | int
+        if not current_level:
+            level = input("Текущий уровень: ")
+        else:
+            level = current_level
+
         state.current_level = int(level)
         start = time.perf_counter()
         bot_reloaded = False
 
-        if max_level:
-            logger.info(f"Условие остановки бота: достигнуть уровня {max_level}")
+        if target_level:
+            logger.info(f"Условие остановки бота: достигнуть уровня {target_level}")
         else:
             logger.info(f"Условие остановки бота: пройти {complete} уровней")
 
@@ -72,10 +84,10 @@ class BotOrchestration:
                 logger.info(f"Пройдено {state.levels_completed} уровней")
                 logger.debug(f"Текущий уровень: {state.current_level}")
 
-                if max_level and state.current_level > max_level:
-                    logger.info(f"Уровень {max_level} достигнут, завершение работы...")
+                if target_level and state.current_level > target_level:
+                    logger.info(f"Уровень {target_level} достигнут, завершение работы...")
                     return
-                elif not max_level and state.levels_completed > complete:
+                elif not target_level and state.levels_completed > complete:
                     logger.info(f"Пройдено {complete} уровней, завершение работы...")
                     return
 

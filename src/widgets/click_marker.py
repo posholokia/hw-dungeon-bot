@@ -12,7 +12,7 @@ class ClickMarker(QWidget):
     """Fullscreen-transparent crosshair shown briefly at a screen point."""
 
     _SIZE = 36
-    _DURATION_MS = 800
+    _DURATION_MS = 1500
 
     _flash_signal = Signal(int, int)
 

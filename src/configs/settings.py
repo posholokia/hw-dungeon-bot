@@ -21,6 +21,22 @@ from domain.types import (
 )
 from models.dto import ClickArea
 
+DEBUG = False
+
+
+def debug_on() -> None:
+    global DEBUG
+    DEBUG = True
+
+
+def debug_off() -> None:
+    global DEBUG
+    DEBUG = False
+
+
+def debug() -> bool:
+    return DEBUG
+
 
 def _configs_dir() -> pathlib.Path:
     # PyInstaller onefile extracts to sys._MEIPASS; settings.json is bundled under configs/.

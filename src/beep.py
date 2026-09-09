@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import logging
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+from structlog import getLogger
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
+
 
 _SOUNDS = (
     Path("/usr/share/sounds/freedesktop/stereo/bell.oga"),
