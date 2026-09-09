@@ -31,9 +31,9 @@ class LogOverlayWindow(QWidget):
     def __init__(
         self,
         *,
-        x: int = 1515,
-        y: int = 275,
-        width: int = 420,
+        x: int = 1505,
+        y: int = 280,
+        width: int = 435,
         height: int = 220,
         opacity: float = 0.82,
         max_lines: int = 120,
@@ -64,7 +64,7 @@ class LogOverlayWindow(QWidget):
         self._text = QTextEdit()
         self._text.setReadOnly(True)
         self._text.setFrameShape(QTextEdit.Shape.NoFrame)
-        self._text.setFont(_mono_font(10))
+        self._text.setFont(_mono_font(8))
         self._text.setStyleSheet(
             """
             QTextEdit {

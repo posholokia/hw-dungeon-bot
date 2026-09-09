@@ -13,8 +13,8 @@ class HeartbeatWidget(QWidget):
     def __init__(
         self,
         *,
-        x: int = 1840,
-        y: int = 245,
+        x: int = 1831,
+        y: int = 257,
         size: int = 48,
     ) -> None:
         super().__init__()
