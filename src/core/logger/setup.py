@@ -10,9 +10,11 @@ def setup_logging(
     overlay_handler: OverlayHandler,
     level: int = logging.DEBUG,
 ) -> None:
-    file_handler: logging.Handler = logging.FileHandler(
-        "bot.log",
+    file_handler: logging.Handler = logging.RotatingFileHandler(
+        "logs/bot.log",
         encoding="utf-8",
+        maxBytes=10 * 1024 * 1024,  # 10 МБ на файл
+        backupCount=5,   
     )
     stream_handler: logging.Handler = logging.StreamHandler()
     handlers = [file_handler, stream_handler]
