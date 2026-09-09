@@ -84,12 +84,10 @@ class BotOrchestration:
                 logger.info(f"Пройдено {state.levels_completed} уровней")
                 logger.debug(f"Текущий уровень: {state.current_level}")
 
-                if target_level and state.current_level == target_level:
-                    logger.info(
-                        f"Уровень {target_level} достигнут, завершение работы..."
-                    )
+                if target_level and state.current_level > target_level:
+                    logger.info(f"Уровень {target_level} достигнут, завершение работы...")
                     return
-                elif not target_level and state.levels_completed == complete:
+                elif not target_level and state.levels_completed > complete:
                     logger.info(f"Пройдено {complete} уровней, завершение работы...")
                     return
 
