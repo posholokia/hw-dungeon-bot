@@ -32,7 +32,7 @@ class LogOverlayWindow(QWidget):
         self,
         *,
         x: int = 1515,
-        y: int = 235,
+        y: int = 275,
         width: int = 420,
         height: int = 220,
         opacity: float = 0.82,

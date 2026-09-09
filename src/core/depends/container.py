@@ -27,6 +27,7 @@ from use_cases.battle import BattleUseCase
 from use_cases.reloader import ReloadGameUseCase
 from use_cases.select_room import SelectRoomUseCase
 from widgets.click_marker import ClickMarker
+from widgets.heartbeat import HeartbeatWidget
 from widgets.log_overlay import LogOverlayWindow
 from widgets.qa_app import QaApp
 
@@ -58,11 +59,16 @@ class DiContainer:
             lambda: ClickMarker(),
             ClickMarker,
         )
+        self._container.add_singleton_by_factory(
+            lambda: HeartbeatWidget(),
+            HeartbeatWidget,
+        )
         # QaApp можно создавать заранее: он только хранит фабрики, не QWidgets.
         self._container.add_singleton_by_factory(
             lambda: QaApp(
                 get_log_window=lambda: get_container().get(LogOverlayWindow),
                 get_click_marker=lambda: get_container().get(ClickMarker),
+                get_heartbeat=lambda: get_container().get(HeartbeatWidget),
             ),
             QaApp,
         )

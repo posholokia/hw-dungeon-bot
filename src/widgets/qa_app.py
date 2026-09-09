@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QApplication
 
 from configs.settings import debug
 from widgets.click_marker import ClickMarker
+from widgets.heartbeat import HeartbeatWidget
 from widgets.log_overlay import LogOverlayWindow
 
 
@@ -21,10 +22,12 @@ class QaApp:
         self,
         get_log_window: Callable[[], LogOverlayWindow],
         get_click_marker: Callable[[], ClickMarker],
+        get_heartbeat: Callable[[], HeartbeatWidget],
     ) -> None:
         # Factories, not instances — widgets are created only after QApplication.
         self._get_log_window = get_log_window
         self._get_click_marker = get_click_marker
+        self._get_heartbeat = get_heartbeat
 
     def run(
         self,
@@ -51,6 +54,10 @@ class QaApp:
         marker: ClickMarker | None = None
         if show_click_marker:
             marker = self._get_click_marker()
+
+        heartbeat = self._get_heartbeat()
+        heartbeat.show()
+        heartbeat.raise_()
 
         worker: threading.Thread | None = None
         if work is not None:
@@ -95,6 +102,8 @@ class QaApp:
             if marker is not None:
                 marker.hide()
                 marker.close()
+            heartbeat.hide()
+            heartbeat.close()
             if debug():
                 overlay.close()
 
