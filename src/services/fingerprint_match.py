@@ -1,8 +1,7 @@
-import logging
-
 from domain.types import FingerPrint
+from structlog import getLogger
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 def match_fingerprint(

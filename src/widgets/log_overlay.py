@@ -31,6 +31,8 @@ class LogOverlayWindow(QWidget):
     def __init__(
         self,
         *,
+        x: int = 1515,
+        y: int = 235,
         width: int = 420,
         height: int = 220,
         opacity: float = 0.82,
@@ -48,7 +50,7 @@ class LogOverlayWindow(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowOpacity(opacity)
-        self.resize(width, height)
+        self.setGeometry(x, y, width, height)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(8, 8, 8, 8)
@@ -75,7 +77,6 @@ class LogOverlayWindow(QWidget):
             """
         )
         root.addWidget(self._text)
-        self._place_bottom_right()
         self._append_signal.connect(self._append_impl)
 
     def append(self, text: str) -> None:

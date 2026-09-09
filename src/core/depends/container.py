@@ -1,12 +1,14 @@
+import logging
 from functools import lru_cache
 
 from rodi import ActivationScope, Container, ServiceLifeStyle, Services
 
-from configs.settings import get_settings
-from core.logger.processors.overlay import OverlayProcessor
+from configs.settings import debug, get_settings
+from core.logger.handlers.overlay import OverlayHandler
 from domain.types import PreviewSeconds, Timeout
 from interfaces.output import IMouseClick
 from output.keyboard import KeyBoardOutput
+from output.mouse.designation import DesignationClick
 from output.mouse.mouse import MouseController
 from run import BattleStateCfg, BotOrchestration
 from services.battle.battle.healing import HealthObserveService
@@ -107,24 +109,29 @@ class DiContainer:
         )
 
     def __init_services(self) -> None:
-        def build_overlay_processor(context: ActivationScope) -> OverlayProcessor:
-            return OverlayProcessor(
-                overlay=lambda: context.get(LogOverlayWindow),
+        def build_overlay_processor(context: ActivationScope) -> OverlayHandler:
+            return OverlayHandler(
+                overlay=lambda: context.get(LogOverlayWindow), level=logging.DEBUG
             )
 
         self._container.add_singleton_by_factory(
-            build_overlay_processor, OverlayProcessor
+            build_overlay_processor, OverlayHandler
         )
 
-        # def build_designation_click(context: ActivationScope) -> DesignationClick:
-        #     marker = lambda: context.get(ClickMarker)
-        #     preview = context.get(PreviewSeconds)
-        #     return DesignationClick(marker=marker, preview_seconds=preview)
+        if debug():
 
-        # self._container.register_factory(
-        #     build_designation_click, IMouseClick, life_style=ServiceLifeStyle.TRANSIENT
-        # )
-        self._container.register(IMouseClick, MouseController)
+            def build_designation_click(context: ActivationScope) -> DesignationClick:
+                marker = lambda: context.get(ClickMarker)
+                preview = context.get(PreviewSeconds)
+                return DesignationClick(marker=marker, preview_seconds=preview)
+
+            self._container.register_factory(
+                build_designation_click,
+                IMouseClick,
+                life_style=ServiceLifeStyle.TRANSIENT,
+            )
+        else:
+            self._container.register(IMouseClick, MouseController)
 
         def build_health_scaner(context: ActivationScope) -> HealthScanerService:
             catalog = context.get(TitanCatalog)
