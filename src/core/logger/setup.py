@@ -19,7 +19,7 @@ def setup_logging(
 
     if debug():
         handlers.append(overlay_handler)
-    
+
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,

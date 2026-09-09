@@ -80,7 +80,12 @@ class BattleUseCase:
             self._replay_service.replay(lose=False, stop_event=stop_event)
             return battle_state, True
 
-        self._health_observe.observe(health_list, battle_state)
+        need_replay = self._health_observe.observe(health_list, battle_state)
+
+        if need_replay:
+            self._replay_service.replay(lose=False, stop_event=stop_event)
+            return battle_state, True
+
         self._replay_service.apply_result(stop_event)
         return battle_state, False
 

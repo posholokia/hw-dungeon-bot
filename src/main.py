@@ -3,10 +3,9 @@ import sys
 from functools import partial
 from threading import Event
 
-from core.logger.handlers.overlay import OverlayHandler
-
 from configs.settings import debug_off, debug_on
 from core.depends.container import get_container
+from core.logger.handlers.overlay import OverlayHandler
 from core.logger.setup import setup_logging
 from run import BotOrchestration
 from widgets.qa_app import QaApp

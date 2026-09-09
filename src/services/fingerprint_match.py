@@ -1,5 +1,6 @@
-from domain.types import FingerPrint
 from structlog import getLogger
+
+from domain.types import FingerPrint
 
 logger = getLogger(__name__)
 

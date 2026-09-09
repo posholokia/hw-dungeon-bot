@@ -1,3 +1,4 @@
+from collections import deque
 from copy import deepcopy
 from dataclasses import dataclass, field
 from logging import Logger
@@ -10,33 +11,51 @@ logger: Logger = getLogger(__name__)
 
 
 @dataclass
+class TitanHealth:
+    name: str
+    health: float
+
+    def __eq__(self, value: object, /) -> bool:
+        if not isinstance(value, type(self)):
+            return False
+
+        return self.name == value.name
+
+
+@dataclass
 class BattleState:
     teams: dict[RoomElement, list[list[str]]]
     healing_team: list[str]
     current_team: list[str] = field(default_factory=list, init=False)
     __room_element: RoomElement | None = field(default=None, init=False)
     __team_index: int = field(default=0, init=False)
-    __need_healing: set[str] = field(default_factory=set, init=False)
+    __need_healing: deque[TitanHealth] = field(default_factory=deque, init=False)
+    __is_healing_try: bool = field(default=False, init=False)
 
     @property
-    def need_healing(self) -> set[str]:
+    def need_healing(self) -> deque[TitanHealth]:
         return self.__need_healing.copy()
 
-    def add_to_leal_list(self, name: str) -> None:
-        self.__need_healing.add(name)
+    @property
+    def is_healing_try(self) -> bool:
+        return self.__is_healing_try
 
-    def remove_from_heal_list(self, name: str) -> None:
-        if name in self.__need_healing:
-            self.__need_healing.remove(name)
+    def add_to_leal_list(self, titan: TitanHealth) -> None:
+        self.__need_healing.append(titan)
+
+    def remove_from_heal_list(self, titan: TitanHealth) -> None:
+        if titan in self.__need_healing:
+            self.__need_healing.remove(titan)
 
     def start(self, element: RoomElement) -> None:
         self.__room_element = element
 
         if self.need_healing and not self.__team_index and element == "common":
-            titan: str = next(iter(self.need_healing))
+            titan: TitanHealth = next(iter(self.need_healing))
             team = self._get_healing_team()
-            team.append(titan)
+            team.append(titan.name)
             self.current_team = team
+            self.__is_healing_try = True
         else:
             try:
                 teams = self._get_element_teams()
@@ -48,6 +67,7 @@ class BattleState:
             except IndexError:
                 logger.debug("Команда не найдена")
                 self.current_team = []
+            self.__is_healing_try = False
 
     @property
     def room_element(self) -> RoomElement:
@@ -71,7 +91,10 @@ class BattleState:
 
     def lose(self) -> None:
         logger.debug("Бой проигран")
-        self.__team_index += 1
+
+        if not self.__is_healing_try:
+            self.__team_index += 1
+
         try:
             assert self.__room_element
             teams = self._get_element_teams()
