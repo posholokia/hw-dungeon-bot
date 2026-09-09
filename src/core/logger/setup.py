@@ -34,21 +34,14 @@ def setup_logging(
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=structlog.stdlib.LoggerFactory(),
     )
-    console_formatter = structlog.stdlib.ProcessorFormatter(
-        processors=[
-            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-            structlog.dev.ConsoleRenderer(colors=True),
-        ],
-    )
     plain_formatter = structlog.stdlib.ProcessorFormatter(
         processors=[
             structlog.stdlib.ProcessorFormatter.remove_processors_meta,
             structlog.dev.ConsoleRenderer(colors=False),
         ],
     )
-    stream_handler.setFormatter(console_formatter)
-    file_handler.setFormatter(plain_formatter)
-    overlay_handler.setFormatter(plain_formatter)
+    for handler in handlers:
+        handler.setFormatter(plain_formatter)
 
     logging.basicConfig(
         handlers=handlers,
