@@ -1,5 +1,6 @@
 import logging
-
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 import structlog
 
 from configs.settings import debug
@@ -10,8 +11,10 @@ def setup_logging(
     overlay_handler: OverlayHandler,
     level: int = logging.DEBUG,
 ) -> None:
-    file_handler: logging.Handler = logging.RotatingFileHandler(
-        "logs/bot.log",
+    log_path = Path("logs/bot.log")
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    file_handler: logging.Handler = RotatingFileHandler(
+        log_path,
         encoding="utf-8",
         maxBytes=10 * 1024 * 1024,  # 10 МБ на файл
         backupCount=5,   
@@ -48,4 +51,5 @@ def setup_logging(
     logging.basicConfig(
         handlers=handlers,
         level=level,
+        force=True,
     )
