@@ -50,7 +50,12 @@ class BattleState:
     def start(self, element: RoomElement) -> None:
         self.__room_element = element
 
-        if self.need_healing and not self.__team_index and element == "common":
+        if (
+            self.need_healing 
+            and not self.__team_index 
+            and element == "common"
+            and not self.__is_healing_try
+        ):
             titan: TitanHealth = next(iter(self.need_healing))
             team = self._get_healing_team()
             team.append(titan.name)
