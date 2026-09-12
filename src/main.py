@@ -4,6 +4,7 @@ from functools import partial
 from threading import Event
 
 from configs.settings import debug_off, debug_on
+from input_.ctrl_q import CtrlQListener
 from core.depends.container import get_container
 from core.logger.handlers.overlay import OverlayHandler
 from core.logger.setup import setup_logging
@@ -68,6 +69,7 @@ def main() -> None:
 
     container = get_container()
     stop_event = Event()
+    CtrlQListener().listen(stop_event)
 
     bot_runner = container.get(BotOrchestration)
     qa_app = container.get(QaApp)
@@ -82,7 +84,7 @@ def main() -> None:
         args.complete,
         args.level,
     )
-    qa_app.run(worker, show_click_marker=True)
+    qa_app.run(worker, stop_event=stop_event, show_click_marker=True)
 
 
 if __name__ == "__main__":

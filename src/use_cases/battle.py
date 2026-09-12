@@ -105,7 +105,7 @@ class BattleUseCase:
                 raise ApplicationError("Не удалось выбрать команду после 5 попыток")
 
             if stop_event.is_set():
-                raise ApplicationError()
+                raise StopApplicationError()
 
     def __dead_sentinel(self, health_list: list[TitanStatus]) -> bool:
         """

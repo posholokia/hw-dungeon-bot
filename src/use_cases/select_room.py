@@ -3,7 +3,7 @@ from threading import Event
 
 from structlog import get_logger
 
-from exceptions import ApplicationError, RetryApplicationError
+from exceptions import ApplicationError, RetryApplicationError, StopApplicationError
 from models.dto import State
 from services.battle.dto import BattleState
 from services.select_room.scaner import RoomFinderService
@@ -37,8 +37,8 @@ class SelectRoomUseCase:
             )
             state.room_element = element
             logger.debug(f"Выбран элемент {element}")
-        except ApplicationError:
+        except (ApplicationError, StopApplicationError):
             raise
-        except Exception as e:
-            logger.exception(e.__str__())
-            raise RetryApplicationError(e.__str__())
+        except Exception as err:
+            logger.exception(err.__str__())
+            raise RetryApplicationError() from err

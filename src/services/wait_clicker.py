@@ -5,7 +5,7 @@ from threading import Event
 from pydantic.types import HashableItemType
 
 from domain.types import CoordinateList, FingerPrint, Timeout
-from exceptions import ApplicationError
+from exceptions import ApplicationError, StopApplicationError
 from interfaces.cfg import IScreenButton
 from interfaces.output import IMouseClick
 from models.dto import ClickArea
@@ -116,7 +116,7 @@ class WaitClickCheckService:
 
         while time.perf_counter() - start < self._timeout:
             if stop_event.is_set():
-                raise ApplicationError()
+                raise StopApplicationError()
 
             for key, cfg in screen.items():
                 scanned = take_print(cfg.coordinates)
@@ -128,7 +128,7 @@ class WaitClickCheckService:
                 break
 
             if stop_event.wait(timeout=0.005):
-                raise ApplicationError()
+                raise StopApplicationError()
 
         if not founded:
             raise ApplicationError()

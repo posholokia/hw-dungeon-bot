@@ -31,7 +31,7 @@ class ReturnGameService:
         ):
             return False
         logger.debug("Переход в гильдию")
-        time.sleep(randomizer.uniform(3.16, 3.74))
+        time.sleep(randomizer.uniform(9.16, 12.74))
         if not self._clicker.click_and_check(
             area=self._cfg.guild.click_area,
             coordinates=self._cfg.dungeon.coordinates,

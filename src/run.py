@@ -104,7 +104,7 @@ class BotOrchestration:
                 bot_reloaded = False
             except StopApplicationError as e:
                 battle_state.clear()
-                logger.info(e.__str__())
+                logger.info("Остановка приложения...")
                 return
             except RetryApplicationError as e:
                 battle_state.clear()
