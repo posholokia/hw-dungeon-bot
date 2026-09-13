@@ -158,7 +158,8 @@ class FloorTransitConfig(BaseSettings):
 
 class DropGameConfig(BaseSettings):
     screen: ButtonConfig
-    guild: ButtonConfig
+    battles: ButtonConfig
+    battles_tab: ButtonConfig
     dungeon: ButtonConfig
 
 
