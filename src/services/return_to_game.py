@@ -26,12 +26,12 @@ class ReturnGameService:
             bool - статус перехода в подземелье
         """
         logger.debug("Ожидание загрузки игры")
-        
+
         if not self._clicker.wait(
             self._cfg.battles.coordinates, self._cfg.battles.fingerprint, stop_event
         ):
             return False
-        
+
         logger.debug("Переход в 'Сражения'")
         time.sleep(randomizer.uniform(1.16, 1.74))
         if not self._clicker.click_and_check(
@@ -42,7 +42,7 @@ class ReturnGameService:
             match=True,
         ):
             return False
-       
+
         logger.debug("Переход во вкладку сражений")
         if not self._clicker.click_and_check(
             area=self._cfg.battles_tab.click_area,
@@ -52,7 +52,7 @@ class ReturnGameService:
             match=True,
         ):
             return False
-        
+
         time.sleep(randomizer.uniform(2.07, 4.43))
         success = self._clicker.click_and_check(
             area=self._cfg.dungeon.click_area,
@@ -61,7 +61,7 @@ class ReturnGameService:
             stop_event=stop_event,
             match=False,
         )
-        
+
         if success:
             time.sleep(randomizer.uniform(3.44, 4.36))
 

@@ -5,7 +5,7 @@ from rodi import ActivationScope, Container, ServiceLifeStyle, Services
 
 from configs.settings import debug, get_settings
 from core.logger.handlers.overlay import OverlayHandler
-from domain.types import PreviewSeconds, Timeout
+from domain.types import PreviewSeconds, Timeout, TitanTolerance
 from interfaces.output import IMouseClick
 from output.keyboard import KeyBoardOutput
 from output.mouse.designation import DesignationClick
@@ -82,8 +82,8 @@ class DiContainer:
             battle_uc = context.get(BattleUseCase)
             floor_service = context.get(FloorTransitService)
             battle_state = BattleStateCfg(
-                teams=self._config.battle.teams,
-                healing_team=self._config.battle.healing_team,
+                teams=self._config.local_settings.teams,
+                healing_team=self._config.local_settings.healing_team,
             )
             return_service = context.get(ReloadGameUseCase)
 
@@ -160,7 +160,7 @@ class DiContainer:
             timeout = context.get(Timeout)
             clicker = context.get(WaitClickCheckService)
             return ReplayService(
-                replay_conditions=self._config.battle.replay.replay_conditions,
+                replay_conditions=self._config.local_settings.replay_conditions,
                 timeout=timeout,
                 clicker=clicker,
                 replay_buttons=self._config.battle.replay.buttons,
@@ -214,7 +214,9 @@ class DiContainer:
         )
 
         def build_health_observe() -> HealthObserveService:
-            return HealthObserveService(healing_rules=self._config.battle.healing_rules)
+            return HealthObserveService(
+                healing_rules=self._config.local_settings.healing_rules
+            )
 
         self._container.register_factory(
             build_health_observe,
@@ -242,6 +244,7 @@ class DiContainer:
             timeout = context.get(Timeout)
             waiter = context.get(WaitClickCheckService)
             team_coords = [cfg.coordinates for cfg in self._config.battle.current_team]
+            tolerance = context.get(TitanTolerance)
             return BattleScannerService(
                 titan_catalog=catalog,
                 timeout=timeout,
@@ -250,6 +253,7 @@ class DiContainer:
                 result_coordinates=self._config.battle.battle_result.coordinates,
                 result_fingerprints=self._config.battle.battle_result.fingerprints,
                 waiter=waiter,
+                tolerance=tolerance,
             )
 
         self._container.register_factory(
@@ -263,12 +267,14 @@ class DiContainer:
             clicker = context.get(IMouseClick)
             team_areas = [cfg.click_area for cfg in self._config.battle.current_team]
             timeout = context.get(Timeout)
+            tolerance = context.get(TitanTolerance)
             return TeamSelectService(
                 titan_catalog=catalog,
                 clicker=clicker,
                 selected_click_areas=team_areas,
                 selection_cfg=self._config.battle.selection,
                 timeout=timeout,
+                tolerance=tolerance,
             )
 
         self._container.register_factory(
@@ -306,9 +312,15 @@ class DiContainer:
         def build_preview_seconds() -> PreviewSeconds:
             return PreviewSeconds(0.5)
 
+        def build_titan_tolerance() -> TitanTolerance:
+            return TitanTolerance(self._config.titan_tolerance)
+
         self._container.register_factory(
             build_timeout, Timeout, life_style=ServiceLifeStyle.SINGLETON
         )
         self._container.register_factory(
             build_preview_seconds, PreviewSeconds, life_style=ServiceLifeStyle.SINGLETON
+        )
+        self._container.register_factory(
+            build_titan_tolerance, TitanTolerance, life_style=ServiceLifeStyle.SINGLETON
         )

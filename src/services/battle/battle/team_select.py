@@ -5,7 +5,7 @@ from structlog import getLogger
 
 from configs.settings import SelectionConfig
 from core.randomizer import randomizer
-from domain.types import RoomElement, Timeout
+from domain.types import RoomElement, Timeout, TitanTolerance
 from exceptions import ApplicationError
 from interfaces.output import IMouseClick
 from models.dto import ClickArea, Titan
@@ -24,12 +24,14 @@ class TeamSelectService:
         selection_cfg: SelectionConfig,
         clicker: IMouseClick,
         timeout: Timeout,
+        tolerance: TitanTolerance,
     ) -> None:
         self._catalog = titan_catalog
         self._selected_click_areas = selected_click_areas
         self._clicker = clicker
         self._selection_cfg = selection_cfg
         self._timeout = timeout
+        self._tolerance = tolerance
 
     def select_team(
         self,
@@ -122,7 +124,9 @@ class TeamSelectService:
             fingerprint = take_print(cfg.coordinates)
             logger.debug(f"Чек позиции {pos}, отпечаток: {fingerprint}")
 
-            if match_fingerprint(fingerprint, titan.fingerprint, tolerance=17):
+            if match_fingerprint(
+                fingerprint, titan.fingerprint.selection, tolerance=self._tolerance
+            ):
                 logger.info(f"Титан {titan.name} обнаружен на позиции {pos}")
                 area = cfg.click_area
                 self._clicker.mouse_click(area.c, area.width, area.height)
