@@ -3,7 +3,7 @@ from threading import Event
 
 from structlog import getLogger
 
-from domain.types import CoordinateList, FingerPrint, Timeout
+from domain.types import CoordinateList, FingerPrint, Timeout, TitanTolerance
 from exceptions import ApplicationError, StopApplicationError
 from interfaces.cfg import IScreenButton
 from models.dto import Titan
@@ -25,6 +25,7 @@ class BattleScannerService:
         result_coordinates: CoordinateList,
         result_fingerprints: dict[str, FingerPrint],
         waiter: WaitClickCheckService,
+        tolerance: TitanTolerance,
     ) -> None:
         self._analyze_team_coords = analyze_team_coords
         self._titan_catalog = titan_catalog
@@ -33,13 +34,14 @@ class BattleScannerService:
         self._result_fingerprints = result_fingerprints
         self._timeout = timeout
         self._waiter = waiter
+        self._tolerance = tolerance
 
     def scan_team(self) -> set[str]:
         time.sleep(1.2)
         current_team: list[str] = []
-        catalog: dict[str, Titan] = self._titan_catalog.get_titans()
 
         for i in range(1, len(self._analyze_team_coords) + 1):
+            catalog: dict[str, Titan] = self._titan_catalog.get_titans_for_position(i)
             name = self.__scan_position(i, catalog)
             if name == "<EMPTY>":
                 logger.info(f"Позиция {i} пустая")
@@ -62,10 +64,10 @@ class BattleScannerService:
         team = current_team.copy()
         team.reverse()
         last_active_position: int | None = None
-        catalog: dict[str, Titan] = self._titan_catalog.get_titans()
         replacement: dict[int, str] = {}
 
         for pos, name in enumerate(team, start=1):
+            catalog: dict[str, Titan] = self._titan_catalog.get_titans_for_position(pos)
             scan_tries = 0
             if name == "<EMPTY>" and last_active_position is None:
                 continue
@@ -111,9 +113,18 @@ class BattleScannerService:
             scans.append(scanned)
 
             for name, titan in catalog.items():
-                matched = match_fingerprint(scanned, titan.fingerprint, tolerance=17)
-                if matched:
+                if pos not in titan.fingerprint.team:
+                    continue
+
+                if match_fingerprint(
+                    scanned,
+                    titan.fingerprint.team[pos],
+                    tolerance=self._tolerance,
+                ):
                     return name
+
+                elif self._match_empty(scanned, pos):
+                    return "<EMPTY>"
             time.sleep(0.05)
 
         raise ApplicationError(
@@ -156,3 +167,10 @@ class BattleScannerService:
                 raise StopApplicationError()
 
         raise ApplicationError("Не удалось сматчить экран результата боя")
+
+    def _match_empty(self, scanned: FingerPrint, pos: int) -> bool:
+        return match_fingerprint(
+            scanned,
+            self._titan_catalog.get_empty_cell_fp(pos),
+            tolerance=self._tolerance,
+        )

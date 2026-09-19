@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+
 import structlog
 
 from configs.settings import debug
@@ -17,7 +18,7 @@ def setup_logging(
         log_path,
         encoding="utf-8",
         maxBytes=10 * 1024 * 1024,  # 10 МБ на файл
-        backupCount=5,   
+        backupCount=5,
     )
     stream_handler: logging.Handler = logging.StreamHandler()
     handlers = [file_handler, stream_handler]

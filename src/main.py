@@ -4,10 +4,10 @@ from functools import partial
 from threading import Event
 
 from configs.settings import debug_off, debug_on
-from input_.ctrl_q import CtrlQListener
 from core.depends.container import get_container
 from core.logger.handlers.overlay import OverlayHandler
 from core.logger.setup import setup_logging
+from input_.ctrl_q import CtrlQListener
 from run import BotOrchestration
 from widgets.qa_app import QaApp
 

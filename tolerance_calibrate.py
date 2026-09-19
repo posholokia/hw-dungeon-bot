@@ -8,6 +8,8 @@
 import math
 
 from core.depends.container import get_container
+from domain.types import FingerPrint
+from models.dto import Titan
 from services.fingerprint_match import match_fingerprint
 from services.titan_catalog import TitanCatalog
 
@@ -21,14 +23,33 @@ def check_collision(tolerance: int) -> bool:
         for inner in titans:
             if titan.name == inner.name:
                 continue
-
-            if match_fingerprint(
-                titan.fingerprint, inner.fingerprint, tolerance=tolerance
-            ):
-                print(f"Tolerance ({tolerance}) {titan.name} == {inner.name}")
-                return True
+            match_fp = get_fp_for_match(titan, inner)
+            for first, second in match_fp:
+                if match_fingerprint(first, second, tolerance=tolerance):
+                    print(f"Tolerance ({tolerance}) {titan.name} == {inner.name}")
+                    return True
 
     return False
+
+
+def get_fp_for_match(
+    first: Titan, second: Titan
+) -> list[tuple[FingerPrint, FingerPrint]]:
+    positions = [
+        element[0]
+        for element in zip(
+            first.fingerprint.team.keys(), second.fingerprint.team.keys()
+        )
+    ]
+    fp_list = [(first.fingerprint.selection, second.fingerprint.selection)]
+    for pos in positions:
+        fp_list.append(
+            (
+                first.fingerprint.team[pos],
+                second.fingerprint.team[pos],
+            )
+        )
+    return fp_list
 
 
 if __name__ == "__main__":
