@@ -16,8 +16,13 @@ class ClickArea(BaseModel):
         return (self.x, self.y)
 
 
+class TitanFP(BaseModel):
+    team: dict[int, FingerPrint]
+    selection: FingerPrint
+
+
 class Titan(BaseModel):
-    fingerprint: FingerPrint
+    fingerprint: TitanFP
     name: str
     element: TitanElement
     role: TitanRole

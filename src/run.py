@@ -102,7 +102,7 @@ class BotOrchestration:
                         f"Скорость прохождения уровней: {time_per_100} минут на 100 уровней"
                     )
                 bot_reloaded = False
-            except StopApplicationError as e:
+            except StopApplicationError:
                 battle_state.clear()
                 logger.info("Остановка приложения...")
                 return

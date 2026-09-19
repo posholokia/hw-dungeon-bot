@@ -51,8 +51,8 @@ class BattleState:
         self.__room_element = element
 
         if (
-            self.need_healing 
-            and not self.__team_index 
+            self.need_healing
+            and not self.__team_index
             and element == "common"
             and not self.__is_healing_try
         ):

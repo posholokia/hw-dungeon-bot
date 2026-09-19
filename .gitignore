@@ -9,3 +9,6 @@ __pycache__/
 .pytest_cache/
 *.log
 logs/
+titans/
+generate_settings/*.json
+!generate_settings/area.json

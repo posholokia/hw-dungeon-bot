@@ -2,7 +2,7 @@ import pathlib
 import sys
 from typing import Any, Self
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import (
     BaseSettings,
     JsonConfigSettingsSource,
@@ -79,7 +79,7 @@ class SelectionConfig(BaseSettings):
     filter_button: ClickArea
     elements: dict[TitanElement, ClickArea]
     roles: dict[TitanRole, ClickArea]
-    check_positions: dict[str, IconPositionConfig]
+    check_positions: dict[int, IconPositionConfig]
     clear_filters: dict[str, ClickArea]
 
 
@@ -126,28 +126,16 @@ class ReplayButtonsConfig(BaseSettings):
 
 
 class ReplayConfig(BaseSettings):
-    replay_conditions: dict[str, list[str]]
     buttons: ReplayButtonsConfig
 
 
 class BattleConfigs(BaseSettings):
     current_team: list[TitanTeamConfig]
-    teams: dict[RoomElement, list[list[str]]]  # имена титанов
-    healing_team: list[str]  # имена титанов
-    healing_rules: HealingRulesConfig
     selection: SelectionConfig
     autobattle: ButtonConfig
     battle_result: BattleResultConfig
     titan_status: TitanStatusConfig
     replay: ReplayConfig
-
-    @model_validator(mode="after")
-    def healing_validate(self) -> Self:
-        if set(self.healing_team) & set(self.healing_rules.titans):
-            raise ValueError(
-                "Титаны, выбранные для лечения не должны состоять в команде лечения"
-            )
-        return self
 
 
 class FloorTransitConfig(BaseSettings):
@@ -163,12 +151,52 @@ class DropGameConfig(BaseSettings):
     dungeon: ButtonConfig
 
 
+class LocalConfig(BaseSettings):
+    teams: dict[RoomElement, list[list[str]]]  # имена титанов
+    healing_team: list[str]  # имена титанов
+    healing_rules: HealingRulesConfig
+    replay_conditions: dict[str, list[str]]
+    scan_shift_y: int
+
+    @model_validator(mode="after")
+    def healing_validate(self) -> Self:
+        if set(self.healing_team) & set(self.healing_rules.titans):
+            raise ValueError(
+                "Титаны, выбранные для лечения не должны состоять в команде лечения"
+            )
+        return self
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (
+            JsonConfigSettingsSource(
+                settings_cls,
+                json_file=_CURRENT_DIR / "local_settings.json",
+                json_file_encoding="utf-8",
+            ),
+            env_settings,
+            dotenv_settings,
+            file_secret_settings,
+        )
+
+    model_config = SettingsConfigDict(extra="ignore")
+
+
 class AppSettings(BaseSettings):
     room: dict[RoomPosition, ButtonConfig]
     selection: SelectionConfigs
     battle: BattleConfigs
     floor_transit: FloorTransitConfig
     drop: DropGameConfig
+    local_settings: LocalConfig = Field(default_factory=LocalConfig)
+    titan_tolerance: int = Field(default=25)
 
     @model_validator(mode="before")
     @classmethod
