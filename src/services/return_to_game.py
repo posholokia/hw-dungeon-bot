@@ -26,7 +26,7 @@ class ReturnGameService:
             bool - статус перехода в подземелье
         """
         logger.debug("Ожидание загрузки игры")
-
+        time.sleep(randomizer.randint(30, 45))
         if not self._clicker.wait(
             self._cfg.battles.coordinates, self._cfg.battles.fingerprint, stop_event
         ):
