@@ -21,7 +21,7 @@ def is_green(rgb: tuple[int, int, int]) -> bool:
 
 def is_yellow(rgb: tuple[int, int, int]) -> bool:
     r, g, b = rgb
-    return 194 <= r <= 247 and 171 <= g <= 219 and b <= 39
+    return 194 <= r <= 247 and 171 <= g <= 225 and b <= 39
 
 
 class HealthScanerService:

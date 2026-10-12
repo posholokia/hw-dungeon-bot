@@ -3,8 +3,8 @@ from threading import Event
 
 from structlog import getLogger
 
-from configs.settings import ReplayButtonsConfig
-from domain.types import Timeout
+from configs.settings import ButtonConfig, ReplayButtonsConfig
+from exceptions import RetryApplicationError
 from services.battle.dto import TitanStatus
 from services.wait_clicker import WaitClickCheckService
 
@@ -14,12 +14,10 @@ logger: Logger = getLogger(__name__)
 class ReplayService:
     def __init__(
         self,
-        timeout: Timeout,
         replay_conditions: dict[str, list[str]],
         replay_buttons: ReplayButtonsConfig,
         clicker: WaitClickCheckService,
     ) -> None:
-        self._timeout = timeout
         self._replay_conditions = replay_conditions
         self._replay_buttons = replay_buttons
         self._clicker = clicker
@@ -38,26 +36,25 @@ class ReplayService:
     def replay(self, lose: bool, stop_event: Event) -> None:
         key = "lose" if lose else "win"
         logger.info("Ожидание кнопки 'Еще раз'")
-        self._clicker.wait_click_check(
-            self._replay_buttons.replay[key],
-            stop_event,
-        )
+        self.__button_click(self._replay_buttons.replay[key], stop_event)
         logger.info("Ожидание кнопки паузы боя")
-        self._clicker.wait_click_check(
-            self._replay_buttons.pause,
-            stop_event,
-        )
+        self.__button_click(self._replay_buttons.pause, stop_event)
         logger.info("Ожидание кнопки 'Отступить'")
-        self._clicker.wait_click_check(
-            self._replay_buttons.retreat,
-            stop_event,
-        )
+        self.__button_click(self._replay_buttons.retreat, stop_event)
 
     def apply_result(self, stop_event: Event) -> None:
         self._clicker.wait_click_check(
             self._replay_buttons.ok,
             stop_event,
         )
+
+    def __button_click(self, button_cfg: ButtonConfig, stop_event: Event) -> None:
+        success = self._clicker.wait_click_check(
+            button_cfg,
+            stop_event,
+        )
+        if not success:
+            raise RetryApplicationError("Кнопка не найдена")
 
     def __check_criterion(self, titan: TitanStatus, criterion: str) -> bool:
         """

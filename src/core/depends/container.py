@@ -157,11 +157,9 @@ class DiContainer:
         )
 
         def build_replay_service(context: ActivationScope) -> ReplayService:
-            timeout = context.get(Timeout)
             clicker = context.get(WaitClickCheckService)
             return ReplayService(
                 replay_conditions=self._config.local_settings.replay_conditions,
-                timeout=timeout,
                 clicker=clicker,
                 replay_buttons=self._config.battle.replay.buttons,
             )
@@ -307,7 +305,7 @@ class DiContainer:
 
     def __init_types(self) -> None:
         def build_timeout() -> Timeout:
-            return Timeout(30)
+            return Timeout(10)
 
         def build_preview_seconds() -> PreviewSeconds:
             return PreviewSeconds(0.5)
