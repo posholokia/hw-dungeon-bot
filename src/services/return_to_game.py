@@ -27,13 +27,7 @@ class ReturnGameService:
         """
         logger.debug("Ожидание загрузки игры")
         time.sleep(randomizer.randint(30, 45))
-        if not self._clicker.wait(
-            self._cfg.battles.coordinates, self._cfg.battles.fingerprint, stop_event
-        ):
-            return False
-
         logger.debug("Переход в 'Сражения'")
-        time.sleep(randomizer.uniform(1.16, 1.74))
         if not self._clicker.click_and_check(
             area=self._cfg.battles.click_area,
             coordinates=self._cfg.battles_tab.coordinates,
