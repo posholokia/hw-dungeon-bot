@@ -45,7 +45,15 @@ def _configs_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parent
 
 
+def _project_root() -> pathlib.Path:
+    if getattr(sys, "frozen", False):
+        return pathlib.Path(sys.executable).parent
+
+    return pathlib.Path(__file__).resolve().parents[2]
+
+
 _CURRENT_DIR = _configs_dir()
+PROJECT_ROOT = _project_root()
 
 
 class RoomConfigs(BaseSettings):

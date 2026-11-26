@@ -1,10 +1,9 @@
 import logging
 from logging.handlers import RotatingFileHandler
-from pathlib import Path
 
 import structlog
 
-from configs.settings import debug
+from configs.settings import PROJECT_ROOT, debug
 from core.logger.handlers.overlay import OverlayHandler
 
 
@@ -12,7 +11,7 @@ def setup_logging(
     overlay_handler: OverlayHandler,
     level: int = logging.DEBUG,
 ) -> None:
-    log_path = Path("logs/bot.log")
+    log_path = PROJECT_ROOT / "logs" / "bot.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     file_handler: logging.Handler = RotatingFileHandler(
         log_path,
